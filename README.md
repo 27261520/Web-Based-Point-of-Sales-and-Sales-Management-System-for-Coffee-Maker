@@ -10,7 +10,7 @@ A web-based POS and sales management dashboard designed for a Coffee Maker. It i
 * Cruz, 
 * Florentes, 
 * Pepito, Trish Pauline B.
-* Santos, 
+* Santos Cyril John B, 
 
 # Technology Used
 * **Frontend:** HTML, CSS, JavaScript

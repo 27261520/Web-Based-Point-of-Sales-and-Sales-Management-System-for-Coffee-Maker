@@ -8,7 +8,7 @@ A web-based POS and sales management dashboard designed for a Coffee Maker. It i
 * Abayan, Merly T.
 * Caracol, 
 * Cruz, 
-* Florentes, 
+* Florentes, Canx A.
 * Pepito, Trish Pauline B.
 * Santos Cyril John B, 
 

@@ -6,8 +6,8 @@ A web-based POS and sales management dashboard designed for a Coffee Maker. It i
 # Group Members - Team Keyboard Warriors
 * **Enolva, Gabriel B.** (Project Manager)
 * Abayan, Merly T.
-* Caracol, 
-* Cruz, 
+* Caracol, Rona Joy T.
+* Cruz, Alliah Mae B.
 * Florentes, Canx A.
 * Pepito, Trish Pauline B.
 * Santos Cyril John B, 

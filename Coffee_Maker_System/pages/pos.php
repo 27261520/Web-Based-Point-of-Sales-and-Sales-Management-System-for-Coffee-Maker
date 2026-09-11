@@ -1,7 +1,12 @@
 <?php
 session_start();
 
-if (!isset($_SESSION["admin"])) {
+$self_ordering = ($_GET["mode"] ?? "") === "self-order";
+if ($self_ordering) {
+	$_SESSION["self_ordering"] = true;
+}
+
+if (!isset($_SESSION["admin"]) && empty($_SESSION["self_ordering"])) {
 	header("Location: ../index.php");
 	exit();
 }
@@ -65,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "creat
 	exit();
 }
 
-$admin_name = $_SESSION["admin"];
+$admin_name = $_SESSION["admin"] ?? "Guest";
 $products = [];
 
 $result = $conn->query("SELECT id, product_name, category, price, addons, image_path FROM products WHERE status != 'Inactive' ORDER BY product_name ASC");
@@ -97,11 +102,11 @@ sort($categories);
 		.sidebar { width: 245px; min-height: 100vh; background: #2b1610; color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 30px 18px 20px; position: fixed; inset: 0 auto 0 0; }
 		.brand { font-size: 20px; font-weight: 700; letter-spacing: 1px; padding: 0 16px 35px; }
 		.nav { display: flex; flex-direction: column; gap: 8px; }
-		.nav-item { color: #d5c6c1; text-decoration: none; padding: 14px 16px; border-radius: 4px; font-size: 13px; font-weight: 600; letter-spacing: .5px; }
+		.nav-item { color: #aeb3bd; text-decoration: none; padding: 14px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; letter-spacing: .5px; transition: .2s; }
 		.nav-item:hover, .nav-item.active { background: #74473b; color: #fff; }
-		.sidebar-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #492c25; padding: 18px 10px 0; }
-		.user { display: flex; align-items: center; gap: 10px; color: #dfe2e8; font-size: 11px; font-weight: 600; }
-		.avatar { width: 34px; height: 34px; border-radius: 50%; background: #60463e; display: grid; place-items: center; }
+		.sidebar-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #292e39; padding: 18px 10px 0; }
+		.user { display: flex; align-items: center; gap: 10px; color: #dfe2e8; font-size: 12px; font-weight: 600; }
+		.avatar { width: 34px; height: 34px; border-radius: 50%; background: #303746; display: grid; place-items: center; }
 		.settings { border: 0; background: transparent; color: #fff; font-size: 18px; cursor: pointer; }
 		.content { margin-left: 245px; width: calc(100% - 245px); padding: 42px 35px; }
 		.topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 23px; }
@@ -150,9 +155,11 @@ sort($categories);
 		.notes { width: 100%; min-height: 38px; resize: vertical; border: 1px solid #ded7d4; border-radius: 6px; padding: 10px; font: inherit; font-size: 11px; }
 		.customizer-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 17px; background: #faf9f8; } .item-total small { display: block; color: #807570; font-size: 9px; } .item-total strong { font-size: 19px; } .modal-actions { display: flex; gap: 8px; } .quantity-control { display: flex; align-items: center; border: 1px solid #ded7d4; border-radius: 6px; overflow: hidden; } .quantity-control button { width: 28px; height: 30px; border: 0; background: #fff; cursor: pointer; } .quantity-control span { width: 25px; text-align: center; font-size: 11px; }
 		.checkout-modal { width: min(100%, 620px); max-height: 90vh; overflow: auto; border-radius: 10px; background: #fff; box-shadow: 0 18px 45px rgba(0,0,0,.25); } .checkout-header { padding: 20px 22px; border-bottom: 1px solid #eee; } .checkout-header h2 { font-size: 19px; } .checkout-header p { margin-top: 5px; color: #8d8581; font-size: 11px; } .checkout-items { padding: 8px 22px; } .checkout-item { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 13px; padding: 14px 0; border-bottom: 1px solid #f0edeb; } .checkout-item strong { display: block; color: #382a25; font-size: 11px; } .checkout-item small { display: block; margin-top: 4px; color: #8d8581; font-size: 10px; } .checkout-price { white-space: nowrap; font-size: 11px; } .checkout-quantity { display: flex; align-items: center; border: 1px solid #ded7d4; border-radius: 5px; overflow: hidden; } .checkout-quantity button { width: 25px; height: 25px; border: 0; background: #fff; color: #54392f; cursor: pointer; } .checkout-quantity span { width: 24px; text-align: center; font-size: 10px; } .remove-item { border: 0; background: transparent; color: #a34a3f; font-size: 10px; cursor: pointer; } .checkout-summary { margin: 0 22px; padding: 15px 0; border-top: 1px solid #e8e2df; } .summary-row { display: flex; justify-content: space-between; margin: 7px 0; color: #766e6a; font-size: 11px; } .summary-row.total-row { margin-top: 14px; color: #2b1610; font-weight: 700; font-size: 14px; } .checkout-footer { display: flex; justify-content: space-between; gap: 10px; padding: 16px 22px; background: #faf9f8; } .checkout-footer .button { min-width: 110px; } .confirmation { text-align: center; padding: 50px 22px 36px; } .confirmation-mark { width: 48px; height: 48px; margin: 0 auto 14px; display: grid; place-items: center; border-radius: 50%; background: #e2f2e5; color: #28763b; font-size: 25px; } .confirmation h2 { font-size: 20px; } .confirmation p { margin-top: 8px; color: #766e6a; font-size: 11px; } .confirmation .button { width: min(100%, 300px); margin-top: 28px; }
+		.confirmation-screen { position: fixed; inset: 0; display: grid; place-items: center; padding: 35px; overflow: auto; background: #fbfaf7; z-index: 40; } .confirmation-screen[hidden] { display: none !important; } .confirmation-screen::before { content: none; } .confirmation-layout { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(320px, 1fr) 245px; gap: 45px; align-items: center; width: min(100%, 650px); } .confirmation-main { text-align: center; } .confirmation-screen .confirmation-mark { width: 80px; height: 80px; margin: 0 auto 22px; display: grid; place-items: center; border-radius: 50%; background: #7a3f2a; color: #fff; font-size: 38px; box-shadow: 0 12px 20px rgba(43,22,16,.16); } .confirmation-main h2 { color: #4a2d25; font-size: 22px; } .confirmation-main > p { margin: 9px 0 17px; color: #766e6a; font-size: 10px; } .confirmation-order-card { padding: 20px 18px; border-radius: 8px; background: #fff; box-shadow: 0 5px 13px rgba(43,22,16,.12); } .confirmation-order-card small { display: block; color: #766e6a; font-size: 8px; letter-spacing: .7px; } .confirmation-order-card strong { display: block; margin: 8px 0 12px; color: #442a23; font-size: 34px; } .confirmation-ready { display: inline-block; padding: 6px 13px; border-radius: 15px; background: #e7e2d4; color: #6d665c; font-size: 8px; } .confirmation-receipt { min-height: 300px; padding: 18px 16px; background: #fff; box-shadow: 0 3px 12px rgba(43,22,16,.06); font-size: 8px; color: #655955; } .receipt-brand { text-align: center; color: #4a2d25; font-size: 12px; font-weight: 700; } .receipt-meta { margin: 10px 0; padding: 8px 0; border-top: 1px dashed #ded7d4; border-bottom: 1px dashed #ded7d4; line-height: 1.6; } .receipt-line { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin: 7px 0; } .receipt-line span:first-child { min-width: 0; max-width: 145px; overflow-wrap: anywhere; } .receipt-line small { display: block; margin-top: 3px; color: #7a3f2a; font-size: 7px; font-weight: 700; line-height: 1.4; } .receipt-total { margin-top: 12px; padding-top: 10px; border-top: 1px dashed #ded7d4; font-weight: 700; } .confirmation-done { grid-column: 2; width: 100%; margin-top: -25px; padding: 14px; border: 0; border-radius: 7px; background: #7a3f2a; color: #fff; font-size: 12px; cursor: pointer; } .confirmation-note { grid-column: 2; margin-top: -30px; color: #766e6a; text-align: center; font-size: 8px; }
 		@media (max-width: 850px) { .sidebar { width: 190px; } .content { margin-left: 190px; width: calc(100% - 190px); padding: 25px; } .pos-layout { grid-template-columns: 1fr; } .order-panel { max-width: 480px; } }
-		@media (max-width: 600px) { .app-shell { display: block; } .sidebar { position: relative; width: 100%; min-height: auto; padding: 20px; } .brand { padding-bottom: 20px; } .nav { flex-direction: row; flex-wrap: wrap; } .nav-item { padding: 10px; } .sidebar-footer { margin-top: 22px; } .content { margin-left: 0; width: 100%; padding: 22px 16px; } .topbar { align-items: flex-start; flex-direction: column; gap: 8px; } .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .product-image { height: 100px; } .option-grid { grid-template-columns: 1fr; } .customizer-footer { align-items: flex-start; flex-direction: column; } .modal-actions { width: 100%; justify-content: flex-end; } }
+		@media (max-width: 600px) { .app-shell { display: block; } .sidebar { position: relative; width: 100%; min-height: auto; padding: 20px; } .brand { padding-bottom: 20px; } .nav { flex-direction: row; flex-wrap: wrap; } .nav-item { padding: 10px; } .sidebar-footer { margin-top: 22px; } .content { margin-left: 0; width: 100%; padding: 22px 16px; } .topbar { align-items: flex-start; flex-direction: column; gap: 8px; } .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .product-image { height: 100px; } .option-grid { grid-template-columns: 1fr; } .customizer-footer { align-items: flex-start; flex-direction: column; } .modal-actions { width: 100%; justify-content: flex-end; } .confirmation-screen { padding: 20px 14px; } .confirmation-layout { grid-template-columns: 1fr; gap: 20px; width: min(100%, 360px); } .confirmation-receipt, .confirmation-done, .confirmation-note { grid-column: 1; } .confirmation-done, .confirmation-note { margin-top: 0; } }
 	</style>
+	<link rel="stylesheet" href="../assets/sidebar.css">
 </head>
 <body>
 <main class="app-shell">
@@ -169,7 +176,7 @@ sort($categories);
 		</div>
 		<div class="sidebar-footer">
 			<div class="user"><div class="avatar">♙</div><span><?= htmlspecialchars($admin_name) ?></span></div>
-			<button class="settings" type="button" aria-label="Settings">⚙</button>
+			<a class="settings" href="settings.php" aria-label="Settings" title="Settings">⚙</a>
 		</div>
 	</aside>
 
@@ -213,7 +220,7 @@ sort($categories);
 <div class="modal-backdrop" id="checkoutModal" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle">
 	<section class="checkout-modal">
 		<div id="checkoutReview"><header class="checkout-header"><h2 id="checkoutTitle">Checkout</h2><p>Review your items and make changes before confirming payment.</p></header><div class="checkout-items" id="checkoutItems"></div><div class="checkout-summary"><div class="summary-row"><span>Subtotal</span><span id="checkoutSubtotal">₱0.00</span></div><div class="summary-row"><span>Tax (0%)</span><span>₱0.00</span></div><div class="summary-row total-row"><span>Total Amount</span><span id="checkoutTotal">₱0.00</span></div></div><footer class="checkout-footer"><button class="button" id="backToPos" type="button">BACK</button><button class="button confirm" id="confirmAndPay" type="button">CONFIRM ORDER &amp; PAY</button></footer></div>
-		<div class="confirmation" id="orderConfirmation" hidden><div class="confirmation-mark">✓</div><h2>Order Confirmed</h2><p id="confirmationNumber">Your order has been saved.</p><button class="button confirm" id="doneOrder" type="button">DONE</button></div>
+		<div class="confirmation-screen" id="orderConfirmation" hidden><div class="confirmation-layout"><section class="confirmation-main"><div class="confirmation-mark">✓</div><h2>Order Confirmed!</h2><p>We’re preparing your order. Please keep your order number ready.</p><div class="confirmation-order-card"><small>YOUR ORDER NUMBER</small><strong id="confirmationNumber">#ORD-0000</strong><span class="confirmation-ready">◷ Ready in approx. 5-7 minutes</span></div></section><aside class="confirmation-receipt"><div class="receipt-brand">COFFEE MAKER</div><div class="receipt-meta"><div>Thank you for your order!</div><div id="receiptDate"></div><div id="receiptOrder"></div></div><div id="receiptItems"></div><div class="receipt-line receipt-total"><span>TOTAL</span><span id="receiptTotal">₱0.00</span></div></aside><button class="confirmation-done" id="doneOrder" type="button">Done</button><p class="confirmation-note">This screen will automatically reset in <span id="confirmationCountdown">10</span> seconds.</p></div></div>
 	</section>
 </div>
 <script>
@@ -240,7 +247,8 @@ function openCustomizer(card) {
 	const addonOptions = document.getElementById('addonOptions');
 	let addons = [];
 	try { addons = JSON.parse(card.dataset.addons || '[]'); } catch (error) { addons = []; }
-	addonOptions.innerHTML = addons.filter(Boolean).map(addon => `<label class="option"><input type="checkbox" value="${escapeHtml(addon)}"><span>${escapeHtml(addon)}</span><span class="option-price">Free</span></label>`).join('');
+	addons = addons.filter(Boolean).map(addon => typeof addon === 'string' ? { name: addon, price: 0 } : addon);
+	addonOptions.innerHTML = addons.map(addon => `<label class="option"><input type="checkbox" value="${escapeHtml(addon.name)}" data-price="${Number(addon.price) || 0}"><span>${escapeHtml(addon.name)}</span><span class="option-price">+${currency(Number(addon.price) || 0)}</span></label>`).join('');
 	document.getElementById('addonSection').hidden = addons.length === 0;
 	modal.classList.add('open');
 	updateCustomizerTotal();
@@ -259,6 +267,19 @@ function renderCheckout() {
 	document.getElementById('checkoutSubtotal').textContent = currency(total);
 	document.getElementById('checkoutTotal').textContent = currency(total);
 }
+let confirmationTimer;
+function renderConfirmation(orderNumber) {
+	const total = [...cart.values()].reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+	document.getElementById('confirmationNumber').textContent = `#${orderNumber}`;
+	document.getElementById('receiptOrder').textContent = `Order #: ${orderNumber}`;
+	document.getElementById('receiptDate').textContent = new Date().toLocaleString();
+	document.getElementById('receiptItems').innerHTML = [...cart.values()].map(item => `<div class="receipt-line"><span>${item.quantity}x ${escapeHtml(item.name)} (${escapeHtml(item.size)})${item.addons.length ? `<br><small>ADD-ONS: ${escapeHtml(item.addons.join(', '))}</small>` : ''}</span><span>${currency(item.unitPrice * item.quantity)}</span></div>`).join('');
+	document.getElementById('receiptTotal').textContent = currency(total);
+	let seconds = 10;
+	document.getElementById('confirmationCountdown').textContent = seconds;
+	clearInterval(confirmationTimer);
+	confirmationTimer = setInterval(() => { seconds -= 1; document.getElementById('confirmationCountdown').textContent = seconds; if (seconds <= 0) { clearInterval(confirmationTimer); document.getElementById('doneOrder').click(); } }, 1000);
+}
 function openCheckout() { if (!cart.size) { alert('Add at least one item before checking out.'); return; } renderCheckout(); document.getElementById('checkoutReview').hidden = false; document.getElementById('orderConfirmation').hidden = true; document.getElementById('checkoutModal').classList.add('open'); }
 function closeCheckout() { document.getElementById('checkoutModal').classList.remove('open'); }
 document.querySelectorAll('.product-card').forEach(card => card.addEventListener('click', () => openCustomizer(card)));
@@ -266,7 +287,7 @@ document.querySelectorAll('input[name="cupSize"]').forEach(input => input.addEve
 document.getElementById('addonOptions').addEventListener('change', event => { if (event.target.matches('input')) event.target.closest('.option').classList.toggle('selected', event.target.checked); updateCustomizerTotal(); });
 document.getElementById('increaseQuantity').addEventListener('click', () => { itemQuantity += 1; updateCustomizerTotal(); });
 document.getElementById('decreaseQuantity').addEventListener('click', () => { if (itemQuantity > 1) itemQuantity -= 1; updateCustomizerTotal(); });
-document.getElementById('addToOrder').addEventListener('click', () => { const size = selectedSize(); const addons = [...document.querySelectorAll('#addonOptions input:checked')].map(input => input.value); const notes = document.getElementById('specialNotes').value.trim(); const unitPrice = Number(selectedProduct.dataset.price) + Number(size.dataset.price) + addons.reduce((sum, addon) => sum, 0); const key = `${selectedProduct.dataset.id}-${size.value}-${addons.join('|')}-${notes}`; const item = cart.get(key) || { productId: Number(selectedProduct.dataset.id), name: selectedProduct.dataset.product, size: size.value, addons, notes, unitPrice, quantity: 0 }; item.quantity += itemQuantity; cart.set(key, item); renderCart(); closeCustomizer(); });
+document.getElementById('addToOrder').addEventListener('click', () => { const size = selectedSize(); const selectedAddonInputs = [...document.querySelectorAll('#addonOptions input:checked')]; const addons = selectedAddonInputs.map(input => input.value); const notes = document.getElementById('specialNotes').value.trim(); const unitPrice = Number(selectedProduct.dataset.price) + Number(size.dataset.price) + selectedAddonInputs.reduce((sum, input) => sum + Number(input.dataset.price || 0), 0); const key = `${selectedProduct.dataset.id}-${size.value}-${addons.join('|')}-${notes}`; const item = cart.get(key) || { productId: Number(selectedProduct.dataset.id), name: selectedProduct.dataset.product, size: size.value, addons, notes, unitPrice, quantity: 0 }; item.quantity += itemQuantity; cart.set(key, item); renderCart(); closeCustomizer(); });
 document.getElementById('cancelOrder').addEventListener('click', () => { cart.clear(); renderCart(); });
 document.getElementById('cart').addEventListener('click', event => { const key = event.target.dataset.remove; if (!key) return; cart.delete(key); renderCart(); });
 document.getElementById('confirmOrder').addEventListener('click', openCheckout);
@@ -291,12 +312,12 @@ document.getElementById('confirmAndPay').addEventListener('click', async () => {
 		const response = await fetch('pos.php', { method: 'POST', body: formData });
 		const result = await response.json();
 		if (!response.ok || !result.success) throw new Error(result.message || 'Unable to save the order.');
-		document.getElementById('confirmationNumber').textContent = `Order ${result.order_number} has been saved successfully.`;
+		renderConfirmation(result.order_number);
 		document.getElementById('checkoutReview').hidden = true;
 		document.getElementById('orderConfirmation').hidden = false;
 	} catch (error) { alert(error.message); } finally { button.disabled = false; }
 });
-document.getElementById('doneOrder').addEventListener('click', () => { cart.clear(); renderCart(); closeCheckout(); });
+document.getElementById('doneOrder').addEventListener('click', () => { clearInterval(confirmationTimer); cart.clear(); renderCart(); closeCheckout(); });
 document.getElementById('closeCustomizer').addEventListener('click', closeCustomizer);
 document.getElementById('cancelCustomizer').addEventListener('click', closeCustomizer);
 modal.addEventListener('click', event => { if (event.target === modal) closeCustomizer(); });

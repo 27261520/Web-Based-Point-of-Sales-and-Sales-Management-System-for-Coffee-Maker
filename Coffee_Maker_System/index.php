@@ -2,11 +2,6 @@
 
 session_start();
 
-if (isset($_SESSION["admin"])) {
-    header("Location: pages/dashboard.php");
-    exit();
-}
-
 ?>
 
 <!DOCTYPE html>
@@ -28,24 +23,25 @@ if (isset($_SESSION["admin"])) {
 
         body {
             background: #f5f5f5;
-            min-height: 100vh;
+            min-height: 100dvh;
+            height: 100dvh;
             display: flex;
             justify-content: center;
             align-items: center;
+            overflow: hidden;
         }
 
         /* Main Login Container */
         .login-container {
-            width: 820px;
-            height: 660px;
+            width: 100vw;
+            height: 100dvh;
             display: flex;
-            border: 1px solid #777;
             background: white;
         }
 
         /* LEFT SIDE */
         .left-section {
-            width: 45%;
+            width: 38.5%;
             background: #ffffff;
             display: flex;
             flex-direction: column;
@@ -54,13 +50,13 @@ if (isset($_SESSION["admin"])) {
         }
 
         .logo {
-            width: 100px;
+            width: 120px;
             height: auto;
-            margin-bottom: 35px;
+            margin-bottom: 38px;
         }
 
         .coffee-title {
-            font-size: 40px;
+            font-size: 44px;
             font-weight: 400;
             color: #222;
             letter-spacing: -1px;
@@ -76,7 +72,7 @@ if (isset($_SESSION["admin"])) {
 
         /* RIGHT SIDE */
         .right-section {
-            width: 55%;
+            width: 61.5%;
             background: #916f65;
             display: flex;
             justify-content: center;
@@ -85,11 +81,11 @@ if (isset($_SESSION["admin"])) {
 
         /* LOGIN CARD */
         .login-card {
-            width: 285px;
-            height: 300px;
+            width: 385px;
+            height: 368px;
             background: white;
             border-radius: 8px;
-            padding: 45px 27px;
+            padding: 54px 28px;
         }
 
         .input-group {
@@ -98,7 +94,7 @@ if (isset($_SESSION["admin"])) {
 
         label {
             display: block;
-            font-size: 7px;
+            font-size: 8px;
             font-weight: bold;
             letter-spacing: 1px;
             color: #333;
@@ -111,11 +107,11 @@ if (isset($_SESSION["admin"])) {
 
         .input-box input {
             width: 100%;
-            height: 38px;
+            height: 44px;
             border: 1px solid #bdbdbd;
             border-radius: 7px;
             padding: 0 35px;
-            font-size: 11px;
+            font-size: 12px;
             outline: none;
         }
 
@@ -130,7 +126,7 @@ if (isset($_SESSION["admin"])) {
         .icon {
             position: absolute;
             left: 10px;
-            top: 11px;
+            top: 13px;
             font-size: 13px;
             color: #888;
         }
@@ -138,7 +134,7 @@ if (isset($_SESSION["admin"])) {
         .eye {
             position: absolute;
             right: 10px;
-            top: 11px;
+            top: 13px;
             font-size: 13px;
             color: #999;
             cursor: pointer;
@@ -147,13 +143,13 @@ if (isset($_SESSION["admin"])) {
         /* LOGIN BUTTON */
         .login-button {
             width: 100%;
-            height: 41px;
+            height: 46px;
             margin-top: 10px;
             border: none;
             border-radius: 6px;
             background: #000;
             color: white;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: bold;
             letter-spacing: 1px;
             cursor: pointer;
@@ -177,6 +173,23 @@ if (isset($_SESSION["admin"])) {
             margin-top: 20px;
         }
 
+        .self-order-button {
+            width: 100%;
+            height: 38px;
+            margin-top: 14px;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            background: #fff;
+            color: #443630;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        .self-order-button:hover {
+            background: #f7f2ef;
+            border-color: #cbbab2;
+        }
+
         /* Error Message */
         .error-message {
             color: #b00020;
@@ -186,11 +199,11 @@ if (isset($_SESSION["admin"])) {
         }
 
         /* RESPONSIVE */
-        @media (max-width: 850px) {
+        @media (max-width: 900px) {
 
             .login-container {
-                width: 90%;
-                height: 600px;
+                width: 100%;
+                height: min(600px, calc(100% - 32px));
             }
 
             .coffee-title {
@@ -199,6 +212,12 @@ if (isset($_SESSION["admin"])) {
         }
 
         @media (max-width: 600px) {
+
+            body {
+                height: auto;
+                min-height: 100vh;
+                overflow-y: auto;
+            }
 
             .login-container {
                 width: 90%;
@@ -362,6 +381,14 @@ if (isset($_SESSION["admin"])) {
 
 
                 <div class="bottom-line"></div>
+
+                <button
+                    type="button"
+                    class="self-order-button"
+                    onclick="window.location.href='pages/self_order.php'"
+                >
+                    ♜ &nbsp; Self-Ordering
+                </button>
 
             </form>
 

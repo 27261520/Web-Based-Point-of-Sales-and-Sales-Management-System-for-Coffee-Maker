@@ -1,4 +1,3 @@
-```php
 <?php
 
 session_start();
@@ -56,39 +55,8 @@ if ($result) {
 }
 
 
-// ADMIN NAME
-$admin_name = "ADMIN_01";
-
-if (isset($_SESSION["admin"])) {
-
-    $admin_username = $_SESSION["admin"];
-
-    $stmt = $conn->prepare("
-        SELECT full_name, username
-        FROM users
-        WHERE username = ?
-        LIMIT 1
-    ");
-
-    if ($stmt) {
-
-        $stmt->bind_param("s", $admin_username);
-        $stmt->execute();
-
-        $admin_result = $stmt->get_result();
-
-        if ($admin_result->num_rows > 0) {
-
-            $admin = $admin_result->fetch_assoc();
-
-            $admin_name = !empty($admin["full_name"])
-                ? $admin["full_name"]
-                : $admin["username"];
-        }
-
-        $stmt->close();
-    }
-}
+// Keep the sidebar account label consistent with the other pages.
+$admin_name = $_SESSION["admin"];
 
 
 /* =========================================================
@@ -218,16 +186,6 @@ if ($max_sales <= 0) {
 
 <title>Coffee Maker Dashboard</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link
-href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-rel="stylesheet"
->
-
-
 <style>
 
 /* =========================================================
@@ -241,7 +199,7 @@ rel="stylesheet"
 }
 
 body {
-    font-family: "Inter", Arial, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
     background: #f5f6f8;
     color: #20242b;
 }
@@ -263,105 +221,6 @@ body {
 .app-shell {
     min-height: 100vh;
     display: flex;
-}
-
-
-/* =========================================================
-   SIDEBAR
-   ========================================================= */
-
-.sidebar {
-    width: 245px;
-    min-height: 100vh;
-    background: #2B1610;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 30px 18px 20px;
-    position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
-}
-
-
-.brand {
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    padding: 0 16px 35px;
-}
-
-
-.nav {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-
-.nav-item {
-    text-decoration: none;
-    color: #aeb3bd;
-    padding: 14px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: .5px;
-    transition: .2s;
-}
-
-
-.nav-item:hover {
-    background: #74473b;
-    color: white;
-}
-
-
-.nav-item.active {
-    background: #74473b;
-    color: white;
-}
-
-
-.sidebar-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-top: 1px solid #292e39;
-    padding: 18px 10px 0;
-}
-
-
-.user {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #dfe2e8;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-
-.avatar {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: #303746;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-}
-
-
-.settings {
-    background: none;
-    border: none;
-    color: #aeb3bd;
-    font-size: 19px;
-    cursor: pointer;
 }
 
 
@@ -827,17 +686,6 @@ td:first-child {
 
 
 @media (max-width: 800px) {
-
-    .sidebar {
-        width: 190px;
-    }
-
-    .content {
-        margin-left: 190px;
-        width: calc(100% - 190px);
-        padding: 25px;
-    }
-
     .stats-grid {
         grid-template-columns: 1fr;
     }
@@ -846,20 +694,8 @@ td:first-child {
 
 
 @media (max-width: 600px) {
-
-    .sidebar {
-        position: relative;
-        width: 100%;
-        min-height: auto;
-    }
-
     .app-shell {
         flex-direction: column;
-    }
-
-    .content {
-        margin-left: 0;
-        width: 100%;
     }
 
     .topbar {
@@ -875,6 +711,8 @@ td:first-child {
 }
 
 </style>
+
+<link rel="stylesheet" href="../assets/sidebar.css">
 
 </head>
 
@@ -964,12 +802,14 @@ td:first-child {
         </div>
 
 
-        <button
+        <a
             class="settings"
+            href="settings.php"
             aria-label="Settings"
+            title="Settings"
         >
             ⚙
-        </button>
+        </a>
 
     </div>
 
@@ -1543,4 +1383,3 @@ rangeButtons.forEach(function(button) {
 </body>
 
 </html>
-```

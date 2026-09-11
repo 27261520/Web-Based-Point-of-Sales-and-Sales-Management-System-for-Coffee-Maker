@@ -30,4 +30,4 @@ A web-based POS and sales management dashboard designed for a Coffee Maker. It i
 * Start **Apache** and **MySQL**.
 * Open your browser and go to:
   `http://localhost/Coffee_Maker_System/`
-* The Coffee Maker system should now open.
+* The Coffee Maker system should now open...

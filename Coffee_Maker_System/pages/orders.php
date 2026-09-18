@@ -1,14 +1,35 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-if (!isset($_SESSION["admin"])) {
-	header("Location: ../index.php");
-	exit();
+$is_logged_in = isset($_SESSION["username"]) || isset($_SESSION["admin"]);
+if (!$is_logged_in) {
+    header("Location: ../index.php");
+    exit();
 }
 
 require_once "../config/database.php";
 
-$admin_name = $_SESSION["admin"];
+$user_role = $_SESSION["role"] ?? "admin";
+$user_name = $_SESSION["username"] ?? $_SESSION["admin"] ?? "User";
+
+// Fetch user contact/mobile number
+$user_phone = "N/A";
+$logged_username = $_SESSION["username"] ?? $_SESSION["admin"] ?? null;
+if ($logged_username) {
+    $u_stmt = $conn->prepare("SELECT * FROM users WHERE username = ? LIMIT 1");
+    if ($u_stmt) {
+        $u_stmt->bind_param("s", $logged_username);
+        $u_stmt->execute();
+        $u_res = $u_stmt->get_result();
+        if ($u_row = $u_res->fetch_assoc()) {
+            $user_phone = $u_row["phone"] ?? $u_row["mobile"] ?? $u_row["contact_number"] ?? $u_row["phone_number"] ?? "N/A";
+        }
+        $u_stmt->close();
+    }
+}
+
 $search = trim($_GET["search"] ?? "");
 $page = max(1, (int) ($_GET["page"] ?? 1));
 $per_page = 8;
@@ -17,10 +38,10 @@ $params = [];
 $types = "";
 
 if ($search !== "") {
-	$where[] = "(o.order_number LIKE ? OR o.customer_name LIKE ? OR oi.item_names LIKE ?)";
-	$term = "%" . $search . "%";
-	$params = [$term, $term, $term];
-	$types = "sss";
+    $where[] = "(o.order_number LIKE ? OR o.customer_name LIKE ? OR oi.item_names LIKE ?)";
+    $term = "%" . $search . "%";
+    $params = [$term, $term, $term];
+    $types = "sss";
 }
 $where_sql = $where ? "WHERE " . implode(" AND ", $where) : "";
 
@@ -53,6 +74,7 @@ $query_string = http_build_query(["search" => $search]);
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Orders | Coffee Maker</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 	<style>
 		* { box-sizing: border-box; margin: 0; padding: 0; }
 		body { background: #f7f7f7; color: #2b211e; font-family: Arial, Helvetica, sans-serif; }
@@ -63,9 +85,32 @@ $query_string = http_build_query(["search" => $search]);
 		.nav { display: flex; flex-direction: column; gap: 8px; }
 		.nav-item:hover, .nav-item.active { background: #74473b; color: #fff; }
 		.sidebar-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #492c25; padding: 18px 10px 0; }
-		.avatar { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: #60463e; }
-		.user { display: flex; align-items: center; gap: 10px; color: #dfe2e8; font-size: 11px; font-weight: 600; }
-		.settings { border: 0; background: transparent; color: #fff; font-size: 18px; text-decoration: none; cursor: pointer; }
+		
+		/* Profile & Popover Styles */
+		.user-wrapper { position: relative; flex: 1; }
+		.user { display: flex; align-items: center; gap: 10px; color: #dfe2e8; font-size: 12px; font-weight: 600; cursor: pointer; padding: 6px 8px; border-radius: 6px; transition: background 0.2s; user-select: none; }
+		.user:hover { background: #3c2018; }
+		.avatar { width: 34px; height: 34px; border-radius: 50%; background: #60463e; display: grid; place-items: center; font-size: 14px; color: #fff; flex-shrink: 0; }
+		.user-details-text { display: flex; flex-direction: column; line-height: 1.25; }
+		.user-name { color: #fff; font-size: 13px; font-weight: 600; }
+		.user-role { color: #aeb3bd; font-size: 10px; }
+		.toggle-icon { margin-left: auto; font-size: 10px; color: #aeb3bd; transition: transform 0.2s; }
+		.user.active .toggle-icon { transform: rotate(180deg); }
+
+		.user-popover { position: absolute; bottom: calc(100% + 12px); left: 0; width: 210px; background: #ffffff; color: #20242a; border-radius: 8px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25); padding: 14px; display: none; z-index: 100; animation: popoverFadeIn 0.2s ease; }
+		.user-popover.show { display: block; }
+		@keyframes popoverFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+		.popover-header { display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+		.popover-avatar { font-size: 28px; color: #74473b; }
+		.badge-role { display: inline-block; font-size: 9px; background: #f0ecea; color: #74473b; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-top: 3px; }
+		.popover-body { padding: 10px 0; }
+		.info-row { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #555; }
+		.info-row i { color: #74473b; width: 14px; }
+		.popover-footer { padding-top: 10px; border-top: 1px solid #eee; }
+		.popover-logout { display: flex; align-items: center; gap: 8px; color: #e74c3c; text-decoration: none; font-size: 12px; font-weight: 600; padding: 6px 8px; border-radius: 5px; transition: background 0.15s; }
+		.popover-logout:hover { background: #fdf2f2; }
+
+		.settings { border: 0; background: transparent; color: #fff; font-size: 18px; text-decoration: none; cursor: pointer; display: flex; align-items: center; }
 		.content { width: calc(100% - 245px); margin-left: 245px; padding: 67px 36px; }
 		.topbar { display: flex; align-items: end; justify-content: space-between; margin-bottom: 25px; }
 		h1 { font-size: 24px; }
@@ -97,8 +142,57 @@ $query_string = http_build_query(["search" => $search]);
 <body>
 <main class="app-shell">
 	<aside class="sidebar">
-		<div><div class="brand">COFFEE MAKER</div><nav class="nav"><a class="nav-item" href="dashboard.php">DASHBOARD</a><a class="nav-item" href="pos.php">POS</a><a class="nav-item active" href="orders.php">ORDERS</a><a class="nav-item" href="products.php">PRODUCTS</a><a class="nav-item" href="users.php">USERS</a></nav></div>
-		<div class="sidebar-footer"><div class="user"><span class="avatar">♙</span><span><?= htmlspecialchars($admin_name) ?></span></div><a class="settings" href="settings.php" aria-label="Settings" title="Settings">⚙</a></div>
+		<div>
+			<div class="brand">COFFEE MAKER</div>
+			<nav class="nav">
+				<?php if ($user_role !== "cashier"): ?>
+					<a class="nav-item" href="dashboard.php">DASHBOARD</a>
+				<?php endif; ?>
+				<a class="nav-item" href="pos.php">POS</a>
+				<a class="nav-item active" href="orders.php">ORDERS</a>
+				<?php if ($user_role !== "cashier"): ?>
+					<a class="nav-item" href="products.php">PRODUCTS</a>
+					<a class="nav-item" href="users.php">USERS</a>
+				<?php endif; ?>
+			</nav>
+		</div>
+		<div class="sidebar-footer">
+			<div class="user-wrapper">
+				<div class="user" id="userProfileBtn" role="button" tabindex="0">
+					<div class="avatar"><i class="fas fa-user"></i></div>
+					<div class="user-details-text">
+						<span class="user-name"><?= htmlspecialchars($user_name) ?></span>
+						<small class="user-role"><?= htmlspecialchars(ucfirst($user_role)) ?></small>
+					</div>
+					<i class="fas fa-chevron-up toggle-icon"></i>
+				</div>
+
+				<div class="user-popover" id="userPopover">
+					<div class="popover-header">
+						<div class="popover-avatar"><i class="fas fa-user-circle"></i></div>
+						<div>
+							<strong><?= htmlspecialchars($user_name) ?></strong>
+							<span class="badge-role"><?= htmlspecialchars(strtoupper($user_role)) ?></span>
+						</div>
+					</div>
+					<div class="popover-body">
+						<div class="info-row">
+							<i class="fas fa-phone-alt"></i>
+							<span><?= htmlspecialchars($user_phone) ?></span>
+						</div>
+					</div>
+					<div class="popover-footer">
+						<a href="../logout.php" class="popover-logout" onclick="return confirm('Are you sure you want to log out?');">
+							<i class="fas fa-sign-out-alt"></i> Log Out
+						</a>
+					</div>
+				</div>
+			</div>
+
+			<?php if ($user_role !== "cashier"): ?>
+				<a class="settings" href="settings.php" aria-label="Settings" title="Settings"><i class="fas fa-cog"></i></a>
+			<?php endif; ?>
+		</div>
 	</aside>
 	<section class="content">
 		<header class="topbar"><div><h1>Orders</h1><p><?= date("l, F d, Y") ?></p></div></header>
@@ -108,5 +202,25 @@ $query_string = http_build_query(["search" => $search]);
 		</tbody></table></div><footer class="card-footer"><span>Showing <?= count($orders) ?> of <?= $total_orders ?> orders</span><nav class="pagination" aria-label="Order pages"><?php if ($page > 1): ?><a class="page" href="?<?= $query_string ?>&page=<?= $page - 1 ?>">&lsaquo;</a><?php endif; ?><?php for ($number = 1; $number <= $total_pages; $number++): ?><a class="page <?= $number === $page ? "active" : "" ?>" href="?<?= $query_string ?>&page=<?= $number ?>"><?= $number ?></a><?php endfor; ?><?php if ($page < $total_pages): ?><a class="page" href="?<?= $query_string ?>&page=<?= $page + 1 ?>">&rsaquo;</a><?php endif; ?></nav></footer></section>
 	</section>
 </main>
+
+<script>
+const userProfileBtn = document.getElementById('userProfileBtn');
+const userPopover = document.getElementById('userPopover');
+
+if (userProfileBtn && userPopover) {
+	userProfileBtn.addEventListener('click', (event) => {
+		event.stopPropagation();
+		userProfileBtn.classList.toggle('active');
+		userPopover.classList.toggle('show');
+	});
+
+	document.addEventListener('click', (event) => {
+		if (!userPopover.contains(event.target) && !userProfileBtn.contains(event.target)) {
+			userProfileBtn.classList.remove('active');
+			userPopover.classList.remove('show');
+		}
+	});
+}
+</script>
 </body>
 </html>

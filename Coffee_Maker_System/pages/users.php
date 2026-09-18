@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 if (!isset($_SESSION["admin"])) {
     header("Location: ../index.php");
@@ -9,6 +11,25 @@ if (!isset($_SESSION["admin"])) {
 require_once "../config/database.php";
 
 $admin_username = $_SESSION["admin"];
+$user_role = $_SESSION["role"] ?? "admin";
+$user_name = $_SESSION["username"] ?? $_SESSION["admin"] ?? "Admin";
+
+// Fetch user contact/mobile number
+$user_phone = "N/A";
+$logged_username = $_SESSION["username"] ?? $_SESSION["admin"] ?? null;
+if ($logged_username) {
+    $u_stmt = $conn->prepare("SELECT * FROM users WHERE username = ? LIMIT 1");
+    if ($u_stmt) {
+        $u_stmt->bind_param("s", $logged_username);
+        $u_stmt->execute();
+        $u_res = $u_stmt->get_result();
+        if ($u_row = $u_res->fetch_assoc()) {
+            $user_phone = $u_row["phone"] ?? $u_row["mobile"] ?? $u_row["contact_number"] ?? $u_row["phone_number"] ?? "N/A";
+        }
+        $u_stmt->close();
+    }
+}
+
 $message = "";
 $error = "";
 $editing_user = null;
@@ -86,40 +107,301 @@ $admins = count(array_filter($users, fn($user) => strtolower($user["role"]) === 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>User Management | Coffee Maker</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Management | Coffee Maker</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}body{background:#f7f7f7;color:#2b211e;font-family:Arial,Helvetica,sans-serif}.app-shell{min-height:100vh;display:flex}.sidebar{width:242px;min-height:100vh;padding:30px 0 20px;background:#2b1610;color:#fff;position:fixed;display:flex;flex-direction:column;justify-content:space-between}.brand{padding:0 30px 35px;font-size:21px;font-weight:700}.nav{display:grid;gap:3px}.nav-item{padding:14px 30px;color:#d8c8c3;text-decoration:none;font-size:13px;font-weight:700;letter-spacing:.5px}.nav-item:hover,.nav-item.active{background:#54392f;color:#fff}.sidebar-footer{display:flex;align-items:center;gap:10px;border-top:1px solid #43251e;padding:16px 30px 0;font-size:10px;font-weight:700}.avatar{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:#60463e}.content{width:calc(100% - 242px);margin-left:242px;padding:42px 38px}.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}.topbar h1{font-size:25px}.topbar p{margin-top:6px;color:#8f8986;font-size:12px}.button{border:0;border-radius:7px;padding:11px 16px;background:#54392f;color:#fff;font-size:10px;font-weight:700;cursor:pointer}.button:hover{background:#2b1610}.button.light{background:#fff;color:#54392f;border:1px solid #ded7d4}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}.stat,.panel{border:1px solid #eeeae8;border-radius:8px;background:#fff}.stat{padding:18px}.stat small{color:#8f8986;font-size:9px}.stat strong{display:block;margin-top:9px;font-size:22px}.panel{overflow:hidden}.panel-toolbar{display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:1px solid #f0edeb}.search{height:37px;width:min(100%,300px);padding:0 12px;border:1px solid #e5e1df;border-radius:6px;font-size:11px}.table-wrap{overflow-x:auto}table{width:100%;min-width:650px;border-collapse:collapse}th{padding:12px 16px;background:#fcfbfb;color:#756b67;font-size:9px;text-align:left}td{padding:14px 16px;border-top:1px solid #f0edeb;font-size:11px;color:#4c4441}.user-name{font-weight:700;color:#2b211e}.user-email{margin-top:4px;color:#999;font-size:10px}.user-avatar{width:32px;height:32px;border-radius:50%;background:#111;color:#fff;display:grid;place-items:center;font-weight:700}.user-cell{display:flex;align-items:center;gap:10px}.badge{display:inline-block;padding:5px 10px;border-radius:12px;font-size:9px;font-weight:700}.active{background:#e2f2e5;color:#28763b}.inactive{background:#eeeae8;color:#756b67}.role{background:#fff4d8;color:#9a5d19}.actions{display:flex;gap:8px}.icon-button{border:0;background:transparent;color:#6c5e58;cursor:pointer;font-size:11px}.icon-button.delete{color:#a34a3f}.notice{margin-bottom:15px;padding:11px 13px;border-radius:6px;background:#e2f2e5;color:#28763b;font-size:11px}.notice.error{background:#f9e3e0;color:#a53e35}.form-panel{max-width:760px;padding:20px}.form-panel h2{font-size:17px;margin-bottom:18px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field label{display:block;margin-bottom:7px;color:#756b67;font-size:9px;font-weight:700}.field input,.field select{width:100%;height:38px;padding:0 10px;border:1px solid #ded7d4;border-radius:6px;background:#fff;font-size:11px}.form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid #eee}.delete-form{display:inline}.empty{padding:35px;text-align:center;color:#8f8986;font-size:12px}@media(max-width:700px){.sidebar{position:relative;width:100%;min-height:auto;padding:22px 0}.app-shell{display:block}.brand{padding-bottom:20px}.nav{display:flex;flex-wrap:wrap}.nav-item{padding:10px 14px}.sidebar-footer{margin-top:18px}.content{width:100%;margin:0;padding:28px 16px}.topbar{align-items:flex-start;flex-direction:column;gap:12px}.stats{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.panel-toolbar{align-items:stretch;flex-direction:column;gap:10px}.search{width:100%}}
-*{box-sizing:border-box;margin:0;padding:0}body{background:#f7f7f7;color:#2b211e;font-family:Arial,Helvetica,sans-serif}.app-shell{min-height:100vh;display:flex}.sidebar{width:245px;min-height:100vh;padding:30px 18px 20px;background:#2B1610;color:#fff;position:fixed;left:0;top:0;bottom:0;display:flex;flex-direction:column;justify-content:space-between}.brand{padding:0 16px 35px;font-size:20px;font-weight:700;letter-spacing:1px}.nav{display:flex;flex-direction:column;gap:8px}.nav-item{padding:14px 16px;color:#aeb3bd;text-decoration:none;border-radius:8px;font-size:13px;font-weight:600;letter-spacing:.5px;transition:.2s}.nav-item:hover,.nav-item.active{background:#74473b;color:#fff}.sidebar-footer{display:flex;align-items:center;justify-content:space-between;border-top:1px solid #292e39;padding:18px 10px 0;font-size:10px;font-weight:700}.avatar{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:#60463e}.content{width:calc(100% - 245px);margin-left:245px;padding:42px 38px}.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}.topbar h1{font-size:25px}.topbar p{margin-top:6px;color:#8f8986;font-size:12px}.button{border:0;border-radius:7px;padding:11px 16px;background:#54392f;color:#fff;font-size:10px;font-weight:700;cursor:pointer}.button:hover{background:#2b1610}.button.light{background:#fff;color:#54392f;border:1px solid #ded7d4}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}.stat,.panel{border:1px solid #eeeae8;border-radius:8px;background:#fff}.stat{padding:18px}.stat small{color:#8f8986;font-size:9px}.stat strong{display:block;margin-top:9px;font-size:22px}.panel{overflow:hidden}.panel-toolbar{display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:1px solid #f0edeb}.search{height:37px;width:min(100%,300px);padding:0 12px;border:1px solid #e5e1df;border-radius:6px;font-size:11px}.table-wrap{overflow-x:auto}table{width:100%;min-width:650px;border-collapse:collapse}th{padding:12px 16px;background:#fcfbfb;color:#756b67;font-size:9px;text-align:left}td{padding:14px 16px;border-top:1px solid #f0edeb;font-size:11px;color:#4c4441}.user-name{font-weight:700;color:#2b211e}.user-email{margin-top:4px;color:#999;font-size:10px}.user-avatar{width:32px;height:32px;border-radius:50%;background:#111;color:#fff;display:grid;place-items:center;font-weight:700}.user-cell{display:flex;align-items:center;gap:10px}.badge{display:inline-block;padding:5px 10px;border-radius:12px;font-size:9px;font-weight:700}.active{background:#e2f2e5;color:#28763b}.inactive{background:#eeeae8;color:#756b67}.role{background:#fff4d8;color:#9a5d19}.actions{display:flex;gap:8px}.icon-button{border:0;background:transparent;color:#6c5e58;cursor:pointer;font-size:11px}.icon-button.delete{color:#a34a3f}.notice{margin-bottom:15px;padding:11px 13px;border-radius:6px;background:#e2f2e5;color:#28763b;font-size:11px}.notice.error{background:#f9e3e0;color:#a53e35}.form-panel{max-width:760px;padding:20px}.form-panel h2{font-size:17px;margin-bottom:18px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field label{display:block;margin-bottom:7px;color:#756b67;font-size:9px;font-weight:700}.field input,.field select{width:100%;height:38px;padding:0 10px;border:1px solid #ded7d4;border-radius:6px;background:#fff;font-size:11px}.form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid #eee}.delete-form{display:inline}.empty{padding:35px;text-align:center;color:#8f8986;font-size:12px}@media(max-width:700px){.sidebar{position:relative;width:100%;min-height:auto;padding:22px 0}.app-shell{display:block}.brand{padding-bottom:20px}.nav{display:flex;flex-wrap:wrap}.nav-item{padding:10px 14px}.sidebar-footer{margin-top:18px}.content{width:100%;margin:0;padding:28px 16px}.topbar{align-items:flex-start;flex-direction:column;gap:12px}.stats{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.panel-toolbar{align-items:stretch;flex-direction:column;gap:10px}.search{width:100%}}
-.sidebar{width:245px;padding:30px 18px 20px;left:0;top:0;bottom:0}
-.brand{padding:0 16px 35px;font-size:20px;letter-spacing:1px}
-.nav{display:flex;flex-direction:column;gap:8px}
-.nav-item{padding:14px 16px;color:#aeb3bd;border-radius:8px;font-size:13px;font-weight:600;letter-spacing:.5px;transition:.2s}
-.nav-item:hover,.nav-item.active{background:#74473b;color:#fff}
-.sidebar-footer{justify-content:space-between;border-top-color:#292e39;padding:18px 10px 0}
-.content{width:calc(100% - 245px);margin-left:245px}
-@media(max-width:700px){.sidebar{width:100%;padding:22px 0;left:auto;top:auto;bottom:auto}.brand{padding-bottom:20px}.nav{display:flex;flex-direction:row;flex-wrap:wrap}.nav-item{padding:10px 14px}.sidebar-footer{margin-top:18px}.content{width:100%;margin-left:0}}
-    .user { display: flex; align-items: center; gap: 10px; color: #dfe2e8; font-size: 11px; font-weight: 600; }
-    .settings { border: 0; background: transparent; color: #fff; font-size: 18px; text-decoration: none; cursor: pointer; }
-</style>
-<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #f7f7f7; color: #2b211e; font-family: Arial, Helvetica, sans-serif; }
+.app-shell { min-height: 100vh; display: flex; }
+
+/* SIDEBAR STYLES */
 .sidebar { width: 245px; min-height: 100vh; padding: 30px 18px 20px; background: #2b1610; color: #fff; position: fixed; left: 0; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: space-between; }
 .brand { padding: 0 16px 35px; font-size: 20px; font-weight: 700; letter-spacing: 1px; }
 .nav { display: flex; flex-direction: column; gap: 8px; }
 .nav-item { padding: 14px 16px; color: #aeb3bd; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 600; letter-spacing: .5px; transition: .2s; }
 .nav-item:hover, .nav-item.active { background: #74473b; color: #fff; }
-.sidebar-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #292e39; padding: 18px 10px 0; }
-.content { width: calc(100% - 245px); margin-left: 245px; }
+.sidebar-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #492c25; padding: 18px 10px 0; }
+
+/* PROFILE & POPOVER WIDGET STYLES */
+.user-wrapper { position: relative; flex: 1; }
+.user { display: flex; align-items: center; gap: 10px; color: #dfe2e8; font-size: 12px; font-weight: 600; cursor: pointer; padding: 6px 8px; border-radius: 6px; transition: background 0.2s; user-select: none; }
+.user:hover { background: #3c2018; }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: #60463e; display: grid; place-items: center; font-size: 14px; color: #fff; flex-shrink: 0; }
+.user-details-text { display: flex; flex-direction: column; line-height: 1.25; }
+.sidebar .user-name { color: #fff; font-size: 13px; font-weight: 600; }
+.sidebar .user-role { color: #aeb3bd; font-size: 10px; }
+.toggle-icon { margin-left: auto; font-size: 10px; color: #aeb3bd; transition: transform 0.2s; }
+.user.active .toggle-icon { transform: rotate(180deg); }
+
+.user-popover { position: absolute; bottom: calc(100% + 12px); left: 0; width: 210px; background: #ffffff; color: #20242a; border-radius: 8px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25); padding: 14px; display: none; z-index: 100; animation: popoverFadeIn 0.2s ease; }
+.user-popover.show { display: block; }
+@keyframes popoverFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.popover-header { display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+.popover-avatar { font-size: 28px; color: #74473b; }
+.badge-role { display: inline-block; font-size: 9px; background: #f0ecea; color: #74473b; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-top: 3px; }
+.popover-body { padding: 10px 0; }
+.info-row { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #555; }
+.info-row i { color: #74473b; width: 14px; }
+.popover-footer { padding-top: 10px; border-top: 1px solid #eee; }
+.popover-logout { display: flex; align-items: center; gap: 8px; color: #e74c3c; text-decoration: none; font-size: 12px; font-weight: 600; padding: 6px 8px; border-radius: 5px; transition: background 0.15s; }
+.popover-logout:hover { background: #fdf2f2; }
+
+.settings { border: 0; background: transparent; color: #fff; font-size: 18px; text-decoration: none; cursor: pointer; display: flex; align-items: center; }
+
+/* MAIN CONTENT AREA STYLES */
+.content { width: calc(100% - 245px); margin-left: 245px; padding: 42px 38px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+.topbar h1 { font-size: 25px; }
+.topbar p { margin-top: 6px; color: #8f8986; font-size: 12px; }
+.button { border: 0; border-radius: 7px; padding: 11px 16px; background: #54392f; color: #fff; font-size: 10px; font-weight: 700; cursor: pointer; text-decoration: none; }
+.button:hover { background: #2b1610; }
+.button.light { background: #fff; color: #54392f; border: 1px solid #ded7d4; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 22px; }
+.stat, .panel { border: 1px solid #eeeae8; border-radius: 8px; background: #fff; }
+.stat { padding: 18px; }
+.stat small { color: #8f8986; font-size: 9px; }
+.stat strong { display: block; margin-top: 9px; font-size: 22px; }
+.panel { overflow: hidden; }
+.panel-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #f0edeb; }
+.search { height: 37px; width: min(100%, 300px); padding: 0 12px; border: 1px solid #e5e1df; border-radius: 6px; font-size: 11px; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; min-width: 650px; border-collapse: collapse; }
+th { padding: 12px 16px; background: #fcfbfb; color: #756b67; font-size: 9px; text-align: left; }
+td { padding: 14px 16px; border-top: 1px solid #f0edeb; font-size: 11px; color: #4c4441; }
+.user-cell .user-name { font-weight: 700; color: #2b211e; }
+.user-cell .user-email { margin-top: 4px; color: #999; font-size: 10px; }
+.user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #111; color: #fff; display: grid; place-items: center; font-weight: 700; }
+.user-cell { display: flex; align-items: center; gap: 10px; }
+.badge { display: inline-block; padding: 5px 10px; border-radius: 12px; font-size: 9px; font-weight: 700; }
+.badge.active { background: #e2f2e5; color: #28763b; }
+.badge.inactive { background: #eeeae8; color: #756b67; }
+.badge.role { background: #fff4d8; color: #9a5d19; }
+.actions { display: flex; gap: 8px; }
+.icon-button { border: 0; background: transparent; color: #6c5e58; cursor: pointer; font-size: 11px; }
+.icon-button.delete { color: #a34a3f; }
+.notice { margin-bottom: 15px; padding: 11px 13px; border-radius: 6px; background: #e2f2e5; color: #28763b; font-size: 11px; }
+.notice.error { background: #f9e3e0; color: #a53e35; }
+.form-panel { max-width: 760px; padding: 20px; }
+.form-panel h2 { font-size: 17px; margin-bottom: 18px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.field label { display: block; margin-bottom: 7px; color: #756b67; font-size: 9px; font-weight: 700; }
+.field input, .field select { width: 100%; height: 38px; padding: 0 10px; border: 1px solid #ded7d4; border-radius: 6px; background: #fff; font-size: 11px; }
+.form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #eee; }
+.delete-form { display: inline; }
+.empty { padding: 35px; text-align: center; color: #8f8986; font-size: 12px; }
+
 @media (max-width: 700px) {
-    .sidebar { width: 100%; padding: 22px 0; position: relative; left: auto; top: auto; bottom: auto; }
+    .sidebar { width: 100%; min-height: auto; padding: 22px 0; position: relative; left: auto; top: auto; bottom: auto; }
     .brand { padding-bottom: 20px; }
     .nav { flex-direction: row; flex-wrap: wrap; }
     .nav-item { padding: 10px 14px; }
     .sidebar-footer { margin-top: 18px; }
-    .content { width: 100%; margin-left: 0; }
+    .content { width: 100%; margin-left: 0; padding: 28px 16px; }
+    .topbar { align-items: flex-start; flex-direction: column; gap: 12px; }
+    .stats { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .panel-toolbar { align-items: stretch; flex-direction: column; gap: 10px; }
+    .search { width: 100%; }
 }
 </style>
 <link rel="stylesheet" href="../assets/sidebar.css">
-<script>document.addEventListener('DOMContentLoaded', function () { var backButton = document.querySelector('.form-actions .button.light'); if (backButton) backButton.textContent = 'BACK'; });</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var backButton = document.querySelector('.form-actions .button.light');
+    if (backButton) backButton.textContent = 'BACK';
+});
+</script>
 </head>
-<body><main class="app-shell"><aside class="sidebar"><div><div class="brand">COFFEE MAKER</div><nav class="nav"><a class="nav-item" href="dashboard.php">DASHBOARD</a><a class="nav-item" href="pos.php">POS</a><a class="nav-item" href="orders.php">ORDERS</a><a class="nav-item" href="products.php">PRODUCTS</a><a class="nav-item active" href="users.php">USERS</a></nav></div><div class="sidebar-footer"><div class="user"><span class="avatar">♙</span><span><?= htmlspecialchars($admin_username) ?></span></div><a class="settings" href="../logout.php" aria-label="Sign out" title="Sign out">⚙</a></div></aside><section class="content"><header class="topbar"><div><h1>User Management</h1><p>Manage active cashiers and staff accounts</p></div><a class="button" href="users.php?add=1">＋ ADD NEW USER</a></header><?php if ($message): ?><div class="notice"><?= htmlspecialchars($message) ?></div><?php endif; ?><?php if ($error): ?><div class="notice error"><?= htmlspecialchars($error) ?></div><?php endif; ?>
-<?php if (isset($_GET["add"]) || $editing_user): ?><section class="panel form-panel"><h2><?= $editing_user ? "Edit User" : "Add New User" ?></h2><form method="post"><input type="hidden" name="action" value="save_user"><input type="hidden" name="user_id" value="<?= (int) ($editing_user["id"] ?? 0) ?>"><div class="form-grid"><div class="field"><label>FULL NAME</label><input name="full_name" value="<?= htmlspecialchars($editing_user["full_name"] ?? "") ?>" placeholder="e.g. Jane Doe" required></div><div class="field"><label>USERNAME / EMAIL</label><input name="username" value="<?= htmlspecialchars($editing_user["username"] ?? "") ?>" required></div><div class="field"><label>ROLE</label><select name="role"><option <?= (($editing_user["role"] ?? "Staff") === "Staff") ? "selected" : "" ?>>Staff</option><option <?= (($editing_user["role"] ?? "") === "Manager") ? "selected" : "" ?>>Manager</option></select></div><div class="field"><label>STATUS</label><select name="status"><option <?= (($editing_user["status"] ?? "Active") === "Active") ? "selected" : "" ?>>Active</option><option <?= (($editing_user["status"] ?? "") === "Inactive") ? "selected" : "" ?>>Inactive</option></select></div><div class="field"><label>PASSWORD <?= $editing_user ? "(LEAVE BLANK TO KEEP CURRENT)" : "" ?></label><input type="password" name="password" <?= $editing_user ? "" : "required" ?>></div></div><div class="form-actions"><a class="button light" href="users.php">CANCEL</a><button class="button" type="submit">SAVE USER</button></div></form></section><?php else: ?><section class="stats"><article class="stat"><small>TOTAL USERS</small><strong><?= $total_users ?></strong></article><article class="stat"><small>ACTIVE NOW</small><strong><?= $active_users ?></strong></article><article class="stat"><small>MANAGERS</small><strong><?= $admins ?></strong></article></section><section class="panel"><form class="panel-toolbar" method="get"><input class="search" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Search by name or username..." aria-label="Search users"><button class="button light" type="submit">SEARCH</button></form><div class="table-wrap"><table><thead><tr><th>USER</th><th>ROLE</th><th>STATUS</th><th>ACTIONS</th></tr></thead><tbody><?php if ($users): foreach ($users as $user): ?><tr><td><div class="user-cell"><span class="user-avatar"><?= htmlspecialchars(strtoupper(substr($user["full_name"], 0, 1))) ?></span><div><div class="user-name"><?= htmlspecialchars($user["full_name"]) ?></div><div class="user-email"><?= htmlspecialchars($user["username"]) ?></div></div></div></td><td><span class="badge role"><?= htmlspecialchars($user["role"]) ?></span></td><td><span class="badge <?= strtolower($user["status"]) === "active" ? "active" : "inactive" ?>"><?= htmlspecialchars($user["status"]) ?></span></td><td><div class="actions"><a class="icon-button" href="users.php?edit=<?= (int) $user["id"] ?>" title="Edit user">✎ Edit</a><form class="delete-form" method="post" onsubmit="return confirm('Delete this user?');"><input type="hidden" name="action" value="delete_user"><input type="hidden" name="user_id" value="<?= (int) $user["id"] ?>"><button class="icon-button delete" type="submit" title="Delete user">⌫ Delete</button></form></div></td></tr><?php endforeach; else: ?><tr><td class="empty" colspan="4">No users found.</td></tr><?php endif; ?></tbody></table></div></section><?php endif; ?></section></main></body></html>
+<body>
+<main class="app-shell">
+	<aside class="sidebar">
+		<div>
+			<div class="brand">COFFEE MAKER</div>
+			<nav class="nav">
+				<a class="nav-item" href="dashboard.php">DASHBOARD</a>
+				<a class="nav-item" href="pos.php">POS</a>
+				<a class="nav-item" href="orders.php">ORDERS</a>
+				<a class="nav-item" href="products.php">PRODUCTS</a>
+				<a class="nav-item active" href="users.php">USERS</a>
+			</nav>
+		</div>
+
+		<div class="sidebar-footer">
+			<div class="user-wrapper">
+				<div class="user" id="userProfileBtn" role="button" tabindex="0">
+					<div class="avatar"><i class="fas fa-user"></i></div>
+					<div class="user-details-text">
+						<span class="user-name"><?= htmlspecialchars($user_name) ?></span>
+						<small class="user-role"><?= htmlspecialchars(ucfirst($user_role)) ?></small>
+					</div>
+					<i class="fas fa-chevron-up toggle-icon"></i>
+				</div>
+
+				<div class="user-popover" id="userPopover">
+					<div class="popover-header">
+						<div class="popover-avatar"><i class="fas fa-user-circle"></i></div>
+						<div>
+							<strong><?= htmlspecialchars($user_name) ?></strong>
+							<span class="badge-role"><?= htmlspecialchars(strtoupper($user_role)) ?></span>
+						</div>
+					</div>
+					<div class="popover-body">
+						<div class="info-row">
+							<i class="fas fa-phone-alt"></i>
+							<span><?= htmlspecialchars($user_phone) ?></span>
+						</div>
+					</div>
+					<div class="popover-footer">
+						<a href="../logout.php" class="popover-logout" onclick="return confirm('Are you sure you want to log out?');">
+							<i class="fas fa-sign-out-alt"></i> Log Out
+						</a>
+					</div>
+				</div>
+			</div>
+
+			<a class="settings" href="settings.php" aria-label="Settings" title="Settings"><i class="fas fa-cog"></i></a>
+		</div>
+	</aside>
+
+	<section class="content">
+		<header class="topbar">
+			<div>
+				<h1>User Management</h1>
+				<p>Manage active cashiers and staff accounts</p>
+			</div>
+			<a class="button" href="users.php?add=1">＋ ADD NEW USER</a>
+		</header>
+
+		<?php if ($message): ?><div class="notice"><?= htmlspecialchars($message) ?></div><?php endif; ?>
+		<?php if ($error): ?><div class="notice error"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+
+		<?php if (isset($_GET["add"]) || $editing_user): ?>
+			<section class="panel form-panel">
+				<h2><?= $editing_user ? "Edit User" : "Add New User" ?></h2>
+				<form method="post">
+					<input type="hidden" name="action" value="save_user">
+					<input type="hidden" name="user_id" value="<?= (int) ($editing_user["id"] ?? 0) ?>">
+					<div class="form-grid">
+						<div class="field">
+							<label>FULL NAME</label>
+							<input name="full_name" value="<?= htmlspecialchars($editing_user["full_name"] ?? "") ?>" placeholder="e.g. Jane Doe" required>
+						</div>
+						<div class="field">
+							<label>USERNAME / EMAIL</label>
+							<input name="username" value="<?= htmlspecialchars($editing_user["username"] ?? "") ?>" required>
+						</div>
+						<div class="field">
+							<label>ROLE</label>
+							<select name="role">
+								<option <?= (($editing_user["role"] ?? "Staff") === "Staff") ? "selected" : "" ?>>Staff</option>
+								<option <?= (($editing_user["role"] ?? "") === "Manager") ? "selected" : "" ?>>Manager</option>
+							</select>
+						</div>
+						<div class="field">
+							<label>STATUS</label>
+							<select name="status">
+								<option <?= (($editing_user["status"] ?? "Active") === "Active") ? "selected" : "" ?>>Active</option>
+								<option <?= (($editing_user["status"] ?? "") === "Inactive") ? "selected" : "" ?>>Inactive</option>
+							</select>
+						</div>
+						<div class="field">
+							<label>PASSWORD <?= $editing_user ? "(LEAVE BLANK TO KEEP CURRENT)" : "" ?></label>
+							<input type="password" name="password" <?= $editing_user ? "" : "required" ?>>
+						</div>
+					</div>
+					<div class="form-actions">
+						<a class="button light" href="users.php">CANCEL</a>
+						<button class="button" type="submit">SAVE USER</button>
+					</div>
+				</form>
+			</section>
+		<?php else: ?>
+			<section class="stats">
+				<article class="stat">
+					<small>TOTAL USERS</small>
+					<strong><?= $total_users ?></strong>
+				</article>
+				<article class="stat">
+					<small>ACTIVE NOW</small>
+					<strong><?= $active_users ?></strong>
+				</article>
+				<article class="stat">
+					<small>MANAGERS</small>
+					<strong><?= $admins ?></strong>
+				</article>
+			</section>
+
+			<section class="panel">
+				<form class="panel-toolbar" method="get">
+					<input class="search" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Search by name or username..." aria-label="Search users">
+					<button class="button light" type="submit">SEARCH</button>
+				</form>
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th>USER</th>
+								<th>ROLE</th>
+								<th>STATUS</th>
+								<th>ACTIONS</th>
+							</tr>
+						</thead>
+						<tbody>
+						<?php if ($users): foreach ($users as $user): ?>
+							<tr>
+								<td>
+									<div class="user-cell">
+										<span class="user-avatar"><?= htmlspecialchars(strtoupper(substr($user["full_name"], 0, 1))) ?></span>
+										<div>
+											<div class="user-name"><?= htmlspecialchars($user["full_name"]) ?></div>
+											<div class="user-email"><?= htmlspecialchars($user["username"]) ?></div>
+										</div>
+									</div>
+								</td>
+								<td><span class="badge role"><?= htmlspecialchars($user["role"]) ?></span></td>
+								<td><span class="badge <?= strtolower($user["status"]) === "active" ? "active" : "inactive" ?>"><?= htmlspecialchars($user["status"]) ?></span></td>
+								<td>
+									<div class="actions">
+										<a class="icon-button" href="users.php?edit=<?= (int) $user["id"] ?>" title="Edit user">✎ Edit</a>
+										<form class="delete-form" method="post" onsubmit="return confirm('Delete this user?');">
+											<input type="hidden" name="action" value="delete_user">
+											<input type="hidden" name="user_id" value="<?= (int) $user["id"] ?>">
+											<button class="icon-button delete" type="submit" title="Delete user">⌫ Delete</button>
+										</form>
+									</div>
+								</td>
+							</tr>
+						<?php endforeach; else: ?>
+							<tr><td class="empty" colspan="4">No users found.</td></tr>
+						<?php endif; ?>
+						</tbody>
+					</table>
+				</div>
+			</section>
+		<?php endif; ?>
+	</section>
+</main>
+
+<script>
+const userProfileBtn = document.getElementById('userProfileBtn');
+const userPopover = document.getElementById('userPopover');
+
+if (userProfileBtn && userPopover) {
+	userProfileBtn.addEventListener('click', (event) => {
+		event.stopPropagation();
+		userProfileBtn.classList.toggle('active');
+		userPopover.classList.toggle('show');
+	});
+
+	document.addEventListener('click', (event) => {
+		if (!userPopover.contains(event.target) && !userProfileBtn.contains(event.target)) {
+			userProfileBtn.classList.remove('active');
+			userPopover.classList.remove('show');
+		}
+	});
+}
+</script>
+</body>
+</html>

@@ -1,7 +1,10 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-if (!isset($_SESSION["admin"])) {
+$is_logged_in = isset($_SESSION["username"]) || isset($_SESSION["admin"]);
+if (!$is_logged_in) {
     header("Location: ../index.php");
     exit();
 }
@@ -57,7 +60,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 }
 
 $settings = $conn->query("SELECT * FROM store_settings WHERE id = 1")->fetch_assoc();
-$admin_name = $_SESSION["admin"];
+
+$user_role = $_SESSION["role"] ?? "admin";
+$user_name = $_SESSION["username"] ?? $_SESSION["admin"] ?? "User";
+
+// Fetch user contact/mobile number
+$user_phone = "N/A";
+$logged_username = $_SESSION["username"] ?? $_SESSION["admin"] ?? null;
+if ($logged_username) {
+    $u_stmt = $conn->prepare("SELECT * FROM users WHERE username = ? LIMIT 1");
+    if ($u_stmt) {
+        $u_stmt->bind_param("s", $logged_username);
+        $u_stmt->execute();
+        $u_res = $u_stmt->get_result();
+        if ($u_row = $u_res->fetch_assoc()) {
+            $user_phone = $u_row["phone"] ?? $u_row["mobile"] ?? $u_row["contact_number"] ?? $u_row["phone_number"] ?? "N/A";
+        }
+        $u_stmt->close();
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -65,10 +86,44 @@ $admin_name = $_SESSION["admin"];
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Settings | Coffee Maker</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #f7f7f7; color: #2b1610; font-family: Arial, Helvetica, sans-serif; }
 .app-shell { min-height: 100vh; display: flex; }
+.sidebar { width: 245px; min-height: 100vh; padding: 30px 18px 20px; background: #2B1610; color: #fff; position: fixed; left: 0; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: space-between; }
+.brand { padding: 0 16px 35px; font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+.nav { display: flex; flex-direction: column; gap: 8px; }
+.nav-item { padding: 14px 16px; color: #aeb3bd; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 600; letter-spacing: .5px; transition: .2s; }
+.nav-item:hover, .nav-item.active { background: #74473b; color: #fff; }
+.sidebar-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #492c25; padding: 18px 10px 0; }
+
+/* Profile & Popover Styles */
+.user-wrapper { position: relative; flex: 1; }
+.user { display: flex; align-items: center; gap: 10px; color: #dfe2e8; font-size: 12px; font-weight: 600; cursor: pointer; padding: 6px 8px; border-radius: 6px; transition: background 0.2s; user-select: none; }
+.user:hover { background: #3c2018; }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: #60463e; display: grid; place-items: center; font-size: 14px; color: #fff; flex-shrink: 0; }
+.user-details-text { display: flex; flex-direction: column; line-height: 1.25; }
+.user-name { color: #fff; font-size: 13px; font-weight: 600; }
+.user-role { color: #aeb3bd; font-size: 10px; }
+.toggle-icon { margin-left: auto; font-size: 10px; color: #aeb3bd; transition: transform 0.2s; }
+.user.active .toggle-icon { transform: rotate(180deg); }
+
+.user-popover { position: absolute; bottom: calc(100% + 12px); left: 0; width: 210px; background: #ffffff; color: #20242a; border-radius: 8px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25); padding: 14px; display: none; z-index: 100; animation: popoverFadeIn 0.2s ease; }
+.user-popover.show { display: block; }
+@keyframes popoverFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.popover-header { display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+.popover-avatar { font-size: 28px; color: #74473b; }
+.badge-role { display: inline-block; font-size: 9px; background: #f0ecea; color: #74473b; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-top: 3px; }
+.popover-body { padding: 10px 0; }
+.info-row { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #555; }
+.info-row i { color: #74473b; width: 14px; }
+.popover-footer { padding-top: 10px; border-top: 1px solid #eee; }
+.popover-logout { display: flex; align-items: center; gap: 8px; color: #e74c3c; text-decoration: none; font-size: 12px; font-weight: 600; padding: 6px 8px; border-radius: 5px; transition: background 0.15s; }
+.popover-logout:hover { background: #fdf2f2; }
+
+.settings { border: 0; background: transparent; color: #fff; font-size: 18px; text-decoration: none; cursor: pointer; display: flex; align-items: center; }
+
 .content { margin-left: 245px; width: calc(100% - 245px); padding: 34px 38px 60px; }
 .settings-header { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 25px; }
 h1 { font-size: 25px; } .intro { margin-top: 6px; color: #8f8986; font-size: 12px; }
@@ -82,13 +137,66 @@ h1 { font-size: 25px; } .intro { margin-top: 6px; color: #8f8986; font-size: 12p
 .notice { margin-bottom: 17px; padding: 11px 13px; border-radius: 5px; background: #e7f3e9; color: #26733b; font-size: 11px; }
 .actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 8px; padding-top: 17px; border-top: 1px solid #eee5e1; }
 @media (max-width: 850px) { .sidebar { width: 190px; } .content { margin-left: 190px; width: calc(100% - 190px); padding: 25px; } .panel-grid { grid-template-columns: 1fr; } }
-@media (max-width: 600px) { .app-shell { display: block; } .sidebar { position: relative; width: 100%; min-height: auto; } .content { margin: 0; width: 100%; padding: 22px 16px; } .settings-header { align-items: flex-start; flex-direction: column; } .form-grid, .payment-grid { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .app-shell { display: block; } .sidebar { position: relative; width: 100%; min-height: auto; padding: 22px 0; } .content { margin: 0; width: 100%; padding: 22px 16px; } .settings-header { align-items: flex-start; flex-direction: column; } .form-grid, .payment-grid { grid-template-columns: 1fr; } }
 </style>
 <link rel="stylesheet" href="../assets/sidebar.css">
 </head>
 <body>
 <main class="app-shell">
-<aside class="sidebar"><div><div class="brand">COFFEE MAKER</div><nav class="nav"><a class="nav-item" href="dashboard.php">DASHBOARD</a><a class="nav-item" href="pos.php">POS</a><a class="nav-item" href="orders.php">ORDERS</a><a class="nav-item" href="products.php">PRODUCTS</a><a class="nav-item" href="users.php">USERS</a></nav></div><div class="sidebar-footer"><div class="user"><div class="avatar">♙</div><span><?= htmlspecialchars($admin_name) ?></span></div><a class="settings" href="settings.php" aria-label="Settings" title="Settings">⚙</a></div></aside>
+<aside class="sidebar">
+	<div>
+		<div class="brand">COFFEE MAKER</div>
+		<nav class="nav">
+			<?php if ($user_role !== "cashier"): ?>
+				<a class="nav-item" href="dashboard.php">DASHBOARD</a>
+			<?php endif; ?>
+			<a class="nav-item" href="pos.php">POS</a>
+			<a class="nav-item" href="orders.php">ORDERS</a>
+			<?php if ($user_role !== "cashier"): ?>
+				<a class="nav-item" href="products.php">PRODUCTS</a>
+				<a class="nav-item" href="users.php">USERS</a>
+			<?php endif; ?>
+		</nav>
+	</div>
+	<div class="sidebar-footer">
+		<div class="user-wrapper">
+			<div class="user" id="userProfileBtn" role="button" tabindex="0">
+				<div class="avatar"><i class="fas fa-user"></i></div>
+				<div class="user-details-text">
+					<span class="user-name"><?= htmlspecialchars($user_name) ?></span>
+					<small class="user-role"><?= htmlspecialchars(ucfirst($user_role)) ?></small>
+				</div>
+				<i class="fas fa-chevron-up toggle-icon"></i>
+			</div>
+
+			<div class="user-popover" id="userPopover">
+				<div class="popover-header">
+					<div class="popover-avatar"><i class="fas fa-user-circle"></i></div>
+					<div>
+						<strong><?= htmlspecialchars($user_name) ?></strong>
+						<span class="badge-role"><?= htmlspecialchars(strtoupper($user_role)) ?></span>
+					</div>
+				</div>
+				<div class="popover-body">
+					<div class="info-row">
+						<i class="fas fa-phone-alt"></i>
+						<span><?= htmlspecialchars($user_phone) ?></span>
+					</div>
+				</div>
+				<div class="popover-footer">
+					<a href="../logout.php" class="popover-logout" onclick="return confirm('Are you sure you want to log out?');">
+						<i class="fas fa-sign-out-alt"></i> Log Out
+					</a>
+				</div>
+			</div>
+		</div>
+
+		<?php if ($user_role !== "cashier"): ?>
+			<a class="settings" href="settings.php" aria-label="Settings" title="Settings"><i class="fas fa-cog"></i></a>
+		<?php endif; ?>
+	</div>
+</aside>
+
 <section class="content">
 <header class="settings-header"><div><h1>Settings</h1><p class="intro">Manage your store details, receipt preferences, and payment methods.</p></div><div class="header-actions"><a class="button" href="settings.php?tab=<?= htmlspecialchars($active_tab) ?>">Cancel</a><button class="button primary" form="settings-form" type="submit">Save Changes</button></div></header>
 <nav class="tabs"><a class="tab <?= $active_tab === "store" ? "active" : "" ?>" href="settings.php?tab=store">Store Info</a><a class="tab <?= $active_tab === "receipts" ? "active" : "" ?>" href="settings.php?tab=receipts">Receipts</a><a class="tab <?= $active_tab === "payments" ? "active" : "" ?>" href="settings.php?tab=payments">Payments</a></nav>
@@ -105,5 +213,25 @@ h1 { font-size: 25px; } .intro { margin-top: 6px; color: #8f8986; font-size: 12p
 </form>
 </section>
 </main>
+
+<script>
+const userProfileBtn = document.getElementById('userProfileBtn');
+const userPopover = document.getElementById('userPopover');
+
+if (userProfileBtn && userPopover) {
+	userProfileBtn.addEventListener('click', (event) => {
+		event.stopPropagation();
+		userProfileBtn.classList.toggle('active');
+		userPopover.classList.toggle('show');
+	});
+
+	document.addEventListener('click', (event) => {
+		if (!userPopover.contains(event.target) && !userProfileBtn.contains(event.target)) {
+			userProfileBtn.classList.remove('active');
+			userPopover.classList.remove('show');
+		}
+	});
+}
+</script>
 </body>
 </html>

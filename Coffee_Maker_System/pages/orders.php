@@ -74,13 +74,16 @@ $query_string = http_build_query(["search" => $search]);
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Orders | Coffee Maker</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 	<style>
 		* { box-sizing: border-box; margin: 0; padding: 0; }
-		body { background: #f7f7f7; color: #2b211e; font-family: Arial, Helvetica, sans-serif; }
+		body { background: #f7f7f7; color: #2b211e; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; }
 		.app-shell { min-height: 100vh; display: flex; }
 		.nav-item { padding: 14px 16px; color: #aeb3bd; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 600; letter-spacing: .5px; transition: .2s; }
-		.sidebar { width: 245px; min-height: 100vh; padding: 30px 18px 20px; background: #2B1610; color: #fff; position: fixed; left: 0; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: space-between; }
+		.sidebar { width: 245px; min-height: 100vh; padding: 30px 18px 20px; background: #2B1610; color: #fff; position: fixed; left: 0; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: space-between; font-family: Arial, Helvetica, sans-serif; }
 		.brand { padding: 0 16px 35px; font-size: 20px; font-weight: 700; letter-spacing: 1px; }
 		.nav { display: flex; flex-direction: column; gap: 8px; }
 		.nav-item:hover, .nav-item.active { background: #74473b; color: #fff; }
@@ -111,16 +114,16 @@ $query_string = http_build_query(["search" => $search]);
 		.popover-logout:hover { background: #fdf2f2; }
 
 		.settings { border: 0; background: transparent; color: #fff; font-size: 18px; text-decoration: none; cursor: pointer; display: flex; align-items: center; }
-		.content { width: calc(100% - 245px); margin-left: 245px; padding: 67px 36px; }
-		.topbar { display: flex; align-items: end; justify-content: space-between; margin-bottom: 25px; }
-		h1 { font-size: 24px; }
-		.topbar p { margin-top: 7px; color: #8f8986; font-size: 12px; }
+		.content { width: calc(100% - 245px); margin-left: 245px; padding: 35px 40px; }
+		.topbar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 30px; }
+		.topbar h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; color: #20242b; }
+		.topbar p { color: #555d68; font-size: 13px; margin-top: 0; }
 		.toolbar { display: flex; justify-content: space-between; gap: 15px; margin-bottom: 20px; }
 		.search-form { display: flex; gap: 8px; flex: 1; }
-		.search, .filter { height: 38px; border: 1px solid #e5e1df; border-radius: 6px; background: #fff; color: #403532; font-size: 11px; }
+		.search, .filter { height: 38px; border: 1px solid #e5e1df; border-radius: 6px; background: #fff; color: #403532; font-size: 11px; font-family: inherit; }
 		.search { width: min(100%, 360px); padding: 0 13px; }
 		.filter { padding: 0 12px; }
-		.button { height: 38px; border: 0; border-radius: 6px; padding: 0 16px; background: #2b211e; color: #fff; font-size: 10px; font-weight: 700; cursor: pointer; }
+		.button { height: 38px; border: 0; border-radius: 6px; padding: 0 16px; background: #2b211e; color: #fff; font-size: 10px; font-weight: 700; cursor: pointer; font-family: inherit; }
 		.button:hover { background: #54392f; }
 		.table-card { overflow: hidden; border: 1px solid #eeeae8; border-radius: 8px; background: #fff; }
 		.table-wrap { overflow-x: auto; }

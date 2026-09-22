@@ -173,6 +173,9 @@ if ($max_sales <= 0) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Coffee Maker Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 /* =========================================================
@@ -185,7 +188,7 @@ if ($max_sales <= 0) {
 }
 
 body {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     background: #f5f6f8;
     color: #20242b;
 }
@@ -200,8 +203,53 @@ body {
 }
 
 /* =========================================================
-   SIDEBAR FOOTER & USER POPOVER
+   SIDEBAR STYLES (MATCHED EXACTLY TO ORDERS SIDEBAR)
    ========================================================= */
+.sidebar {
+    width: 245px;
+    min-height: 100vh;
+    padding: 30px 18px 20px;
+    background: #2B1610;
+    color: #fff;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.brand {
+    padding: 0 16px 35px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nav-item {
+    padding: 14px 16px;
+    color: #aeb3bd;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .5px;
+    transition: .2s;
+}
+
+.nav-item:hover, .nav-item.active {
+    background: #74473b;
+    color: #fff;
+}
+
 .sidebar-footer { 
     display: flex; 
     align-items: center; 
@@ -405,6 +453,7 @@ body {
     cursor: pointer;
     font-size: 13px;
     font-weight: 600;
+    font-family: inherit;
 }
 
 .refresh:hover {
@@ -412,7 +461,7 @@ body {
 }
 
 /* =========================================================
-   STAT CARDS
+   STAT CARDS & AESTHETIC ICONS
    ========================================================= */
 .stats-grid {
     display: grid;
@@ -424,12 +473,17 @@ body {
 .stat-card {
     background: white;
     border: 1px solid #e4e6ea;
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 22px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     min-height: 125px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
 }
 
 .eyebrow {
@@ -447,18 +501,34 @@ body {
 }
 
 .stat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 21px;
+    font-size: 20px;
+    transition: transform 0.2s ease;
 }
 
-.stat-icon.blue { background: #e9f1ff; }
-.stat-icon.green { background: #e8f8ee; }
-.stat-icon.orange { background: #fff1df; }
+.stat-card:hover .stat-icon {
+    transform: scale(1.05);
+}
+
+.stat-icon.blue { 
+    background: #eff6ff; 
+    color: #2563eb; 
+}
+
+.stat-icon.green { 
+    background: #ecfdf5; 
+    color: #059669; 
+}
+
+.stat-icon.orange { 
+    background: #fff7ed; 
+    color: #ea580c; 
+}
 
 /* =========================================================
    DASHBOARD GRID & PANELS
@@ -515,6 +585,8 @@ body {
     font-size: 11px;
     color: #555d68;
     cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
 }
 
 .segmented button.selected {
@@ -585,6 +657,7 @@ body {
 .bar-group label {
     font-size: 10px;
     color: #555d68;
+    font-weight: 600;
 }
 
 /* =========================================================
@@ -613,6 +686,7 @@ body {
     font-size: 11px;
     font-weight: 600;
     cursor: pointer;
+    font-family: inherit;
 }
 
 .table-wrap {
@@ -690,16 +764,19 @@ td:first-child {
 .product-icon {
     width: 42px;
     height: 42px;
-    border-radius: 8px;
-    background: #edf1f5;
+    border-radius: 10px;
+    background: #f3f4f6;
+    color: #4b5563;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 17px;
+    font-size: 16px;
+    flex-shrink: 0;
 }
 
 .product-icon.warm {
-    background: #fff0dd;
+    background: #fdf2f0;
+    color: #74473b;
 }
 
 .product-info {
@@ -743,18 +820,20 @@ td:first-child {
     .stats-grid { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 600px) {
-    .app-shell { flex-direction: column; }
-    .topbar { align-items: flex-start; gap: 15px; flex-direction: column; }
-    .stats-grid { grid-template-columns: 1fr; }
+@media (max-width: 700px) {
+    .sidebar { position: relative; width: 100%; min-height: auto; padding: 22px 0; }
+    .app-shell { display: block; }
+    .brand { padding-bottom: 20px; }
+    .nav { display: flex; flex-wrap: wrap; }
+    .nav-item { padding: 10px 14px; }
+    .sidebar-footer { margin-top: 18px; }
+    .content { width: 100%; margin-left: 0; padding: 30px 16px; }
 }
 </style>
 <link rel="stylesheet" href="../assets/sidebar.css">
 </head>
 
 <body>
-
-<div class="page-label">DASHBOARD</div>
 
 <main class="app-shell">
 
@@ -765,11 +844,15 @@ td:first-child {
     <div>
         <div class="brand">COFFEE MAKER</div>
         <nav class="nav">
-            <a class="nav-item active" href="dashboard.php">DASHBOARD</a>
+            <?php if ($user_role !== "cashier"): ?>
+                <a class="nav-item active" href="dashboard.php">DASHBOARD</a>
+            <?php endif; ?>
             <a class="nav-item" href="pos.php">POS</a>
             <a class="nav-item" href="orders.php">ORDERS</a>
-            <a class="nav-item" href="products.php">PRODUCTS</a>
-            <a class="nav-item" href="users.php">USERS</a>
+            <?php if ($user_role !== "cashier"): ?>
+                <a class="nav-item" href="products.php">PRODUCTS</a>
+                <a class="nav-item" href="users.php">USERS</a>
+            <?php endif; ?>
         </nav>
     </div>
 
@@ -833,7 +916,9 @@ td:first-child {
             <span class="eyebrow">TOTAL ORDERS</span>
             <strong><?= number_format($total_orders) ?></strong>
         </div>
-        <div class="stat-icon blue">🛒</div>
+        <div class="stat-icon blue">
+            <i class="fa-solid fa-cart-shopping"></i>
+        </div>
     </article>
 
     <article class="stat-card">
@@ -841,7 +926,9 @@ td:first-child {
             <span class="eyebrow">TODAY'S SALES</span>
             <strong>₱<?= number_format($today_sales, 2) ?></strong>
         </div>
-        <div class="stat-icon green">🪙</div>
+        <div class="stat-icon green">
+            <i class="fa-solid fa-wallet"></i>
+        </div>
     </article>
 
     <article class="stat-card">
@@ -849,7 +936,9 @@ td:first-child {
             <span class="eyebrow">TOTAL PRODUCTS</span>
             <strong><?= number_format($total_products) ?></strong>
         </div>
-        <div class="stat-icon orange">📦</div>
+        <div class="stat-icon orange">
+            <i class="fa-solid fa-box-open"></i>
+        </div>
     </article>
 </section>
 
@@ -947,7 +1036,9 @@ td:first-child {
         <?php if (count($top_products) > 0): ?>
             <?php foreach ($top_products as $product): ?>
                 <div class="product-row">
-                    <div class="product-icon warm">☕</div>
+                    <div class="product-icon warm">
+                        <i class="fa-solid fa-mug-hot"></i>
+                    </div>
                     <div class="product-info">
                         <strong><?= htmlspecialchars($product["product_name"]) ?></strong>
                         <span><?= number_format($product["total_quantity"]) ?> Sold</span>

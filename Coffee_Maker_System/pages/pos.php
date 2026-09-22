@@ -172,20 +172,20 @@ sort($categories);
 		* { box-sizing: border-box; margin: 0; padding: 0; }
 		body { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: #f7f7f7; color: #000000; }
 		.app-shell { min-height: 100vh; display: flex; }
-		.sidebar { width: 245px; min-height: 100vh; background: #2b1610; color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 30px 18px 20px; position: fixed; inset: 0 auto 0 0; font-family: Arial, Helvetica, sans-serif; }
-		.brand { font-size: 20px; font-weight: 700; letter-spacing: 1px; padding: 0 16px 35px; }
+		.nav-item { padding: 14px 16px; color: #aeb3bd; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 600; letter-spacing: .5px; transition: .2s; }
+		.sidebar { width: 245px; min-height: 100vh; padding: 30px 18px 20px; background: #2B1610; color: #fff; position: fixed; left: 0; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: space-between; font-family: Arial, Helvetica, sans-serif; }
+		.brand { padding: 0 16px 35px; font-size: 20px; font-weight: 700; letter-spacing: 1px; }
 		.nav { display: flex; flex-direction: column; gap: 8px; }
-		.nav-item { color: #aeb3bd; text-decoration: none; padding: 14px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; letter-spacing: .5px; transition: .2s; }
-		.nav-item:hover, .nav-item.active { background: #74473b; color: #fff; font-weight: 700; }
+		.nav-item:hover, .nav-item.active { background: #74473b; color: #fff; }
 		.sidebar-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #492c25; padding: 18px 10px 0; }
 		
 		/* Profile & Popover Styles */
 		.user-wrapper { position: relative; flex: 1; }
-		.user { display: flex; align-items: center; gap: 10px; color: #dfe2e8; font-size: 12px; font-weight: 700; cursor: pointer; padding: 6px 8px; border-radius: 6px; transition: background 0.2s; user-select: none; }
+		.user { display: flex; align-items: center; gap: 10px; color: #dfe2e8; font-size: 12px; font-weight: 600; cursor: pointer; padding: 6px 8px; border-radius: 6px; transition: background 0.2s; user-select: none; }
 		.user:hover { background: #3c2018; }
 		.avatar { width: 34px; height: 34px; border-radius: 50%; background: #60463e; display: grid; place-items: center; font-size: 14px; color: #fff; flex-shrink: 0; }
 		.user-details-text { display: flex; flex-direction: column; line-height: 1.25; }
-		.user-name { color: #fff; font-size: 13px; font-weight: 700; }
+		.user-name { color: #fff; font-size: 13px; font-weight: 600; }
 		.user-role { color: #aeb3bd; font-size: 10px; }
 		.toggle-icon { margin-left: auto; font-size: 10px; color: #aeb3bd; transition: transform 0.2s; }
 		.user.active .toggle-icon { transform: rotate(180deg); }
@@ -203,11 +203,11 @@ sort($categories);
 		.popover-logout { display: flex; align-items: center; gap: 8px; color: #e74c3c; text-decoration: none; font-size: 12px; font-weight: 600; padding: 6px 8px; border-radius: 5px; transition: background 0.15s; }
 		.popover-logout:hover { background: #fdf2f2; }
 
-		.settings { border: 0; background: transparent; color: #fff; font-size: 16px; cursor: pointer; text-decoration: none; display: flex; align-items: center; }
-		.content { margin-left: 245px; width: calc(100% - 245px); padding: 42px 35px; color: #000000; }
-		.topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 23px; }
-		.topbar h1 { font-size: 26px; margin-bottom: 6px; color: #000000; }
-		.topbar p { color: #000000; font-size: 13px; }
+		.settings { border: 0; background: transparent; color: #fff; font-size: 18px; text-decoration: none; cursor: pointer; display: flex; align-items: center; }
+		.content { margin-left: 245px; width: calc(100% - 245px); padding: 35px 40px; color: #20242b; }
+		.topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
+		.topbar h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; color: #20242b; }
+		.topbar p { color: #555d68; font-size: 13px; }
 		.pos-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 32px; align-items: start; }
 		.toolbar { display: flex; flex-direction: column; gap: 14px; margin-bottom: 25px; }
 		.search { width: min(100%, 480px); height: 40px; border: 1px solid #e0e0e0; border-radius: 6px; background: #fff; padding: 0 14px 0 38px; font-size: 12px; font-family: inherit; outline: none; color: #000000; }

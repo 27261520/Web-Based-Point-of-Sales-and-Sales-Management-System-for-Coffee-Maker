@@ -110,14 +110,17 @@ $admins = count(array_filter($users, fn($user) => strtolower($user["role"]) === 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>User Management | Coffee Maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #f7f7f7; color: #2b211e; font-family: Arial, Helvetica, sans-serif; }
+body { background: #f7f7f7; color: #2b211e; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; }
 .app-shell { min-height: 100vh; display: flex; }
 
 /* SIDEBAR STYLES */
-.sidebar { width: 245px; min-height: 100vh; padding: 30px 18px 20px; background: #2b1610; color: #fff; position: fixed; left: 0; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: space-between; }
+.sidebar { width: 245px; min-height: 100vh; padding: 30px 18px 20px; background: #2b1610; color: #fff; position: fixed; left: 0; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: space-between; font-family: Arial, Helvetica, sans-serif; }
 .brand { padding: 0 16px 35px; font-size: 20px; font-weight: 700; letter-spacing: 1px; }
 .nav { display: flex; flex-direction: column; gap: 8px; }
 .nav-item { padding: 14px 16px; color: #aeb3bd; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 600; letter-spacing: .5px; transition: .2s; }
@@ -151,12 +154,11 @@ body { background: #f7f7f7; color: #2b211e; font-family: Arial, Helvetica, sans-
 .settings { border: 0; background: transparent; color: #fff; font-size: 18px; text-decoration: none; cursor: pointer; display: flex; align-items: center; }
 
 /* MAIN CONTENT AREA STYLES */
-.content { width: calc(100% - 245px); margin-left: 245px; padding: 42px 38px; }
-.topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
-.topbar h1 { font-size: 25px; }
-.topbar p { margin-top: 6px; color: #8f8986; font-size: 12px; }
-.button { border: 0; border-radius: 7px; padding: 11px 16px; background: #54392f; color: #fff; font-size: 10px; font-weight: 700; cursor: pointer; text-decoration: none; }
-.button:hover { background: #2b1610; }
+.content { width: calc(100% - 245px); margin-left: 245px; padding: 35px 40px; }
+.topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
+.topbar h1 { font-size: 28px; font-weight: 700; color: #20242b; }
+.button { height: 38px; border: 0; border-radius: 6px; padding: 0 16px; background: #2b211e; color: #fff; font-size: 10px; font-weight: 700; cursor: pointer; text-decoration: none; font-family: inherit; display: inline-flex; align-items: center; justify-content: center; }
+.button:hover { background: #54392f; }
 .button.light { background: #fff; color: #54392f; border: 1px solid #ded7d4; }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 22px; }
 .stat, .panel { border: 1px solid #eeeae8; border-radius: 8px; background: #fff; }
@@ -164,8 +166,8 @@ body { background: #f7f7f7; color: #2b211e; font-family: Arial, Helvetica, sans-
 .stat small { color: #8f8986; font-size: 9px; }
 .stat strong { display: block; margin-top: 9px; font-size: 22px; }
 .panel { overflow: hidden; }
-.panel-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #f0edeb; }
-.search { height: 37px; width: min(100%, 300px); padding: 0 12px; border: 1px solid #e5e1df; border-radius: 6px; font-size: 11px; }
+.panel-toolbar { display: flex; justify-content: flex-start; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid #f0edeb; }
+.search { height: 38px; width: min(100%, 300px); padding: 0 12px; border: 1px solid #e5e1df; border-radius: 6px; font-size: 11px; font-family: inherit; }
 .table-wrap { overflow-x: auto; }
 table { width: 100%; min-width: 650px; border-collapse: collapse; }
 th { padding: 12px 16px; background: #fcfbfb; color: #756b67; font-size: 9px; text-align: left; }
@@ -178,16 +180,51 @@ td { padding: 14px 16px; border-top: 1px solid #f0edeb; font-size: 11px; color: 
 .badge.active { background: #e2f2e5; color: #28763b; }
 .badge.inactive { background: #eeeae8; color: #756b67; }
 .badge.role { background: #fff4d8; color: #9a5d19; }
-.actions { display: flex; gap: 8px; }
-.icon-button { border: 0; background: transparent; color: #6c5e58; cursor: pointer; font-size: 11px; }
-.icon-button.delete { color: #a34a3f; }
+
+/* AESTHETIC ACTION BUTTONS */
+.actions { display: flex; align-items: center; gap: 8px; }
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+.btn-action.edit {
+    background-color: #f2ece9;
+    color: #54392f;
+}
+.btn-action.edit:hover {
+    background-color: #54392f;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(84, 57, 47, 0.15);
+}
+.btn-action.delete {
+    background-color: #fdf2f2;
+    color: #a34a3f;
+}
+.btn-action.delete:hover {
+    background-color: #a34a3f;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(163, 74, 63, 0.15);
+}
+
 .notice { margin-bottom: 15px; padding: 11px 13px; border-radius: 6px; background: #e2f2e5; color: #28763b; font-size: 11px; }
 .notice.error { background: #f9e3e0; color: #a53e35; }
 .form-panel { max-width: 760px; padding: 20px; }
 .form-panel h2 { font-size: 17px; margin-bottom: 18px; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .field label { display: block; margin-bottom: 7px; color: #756b67; font-size: 9px; font-weight: 700; }
-.field input, .field select { width: 100%; height: 38px; padding: 0 10px; border: 1px solid #ded7d4; border-radius: 6px; background: #fff; font-size: 11px; }
+.field input, .field select { width: 100%; height: 38px; padding: 0 10px; border: 1px solid #ded7d4; border-radius: 6px; background: #fff; font-size: 11px; font-family: inherit; }
 .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #eee; }
 .delete-form { display: inline; }
 .empty { padding: 35px; text-align: center; color: #8f8986; font-size: 12px; }
@@ -269,7 +306,6 @@ document.addEventListener('DOMContentLoaded', function () {
 		<header class="topbar">
 			<div>
 				<h1>User Management</h1>
-				<p>Manage active cashiers and staff accounts</p>
 			</div>
 			<a class="button" href="users.php?add=1">＋ ADD NEW USER</a>
 		</header>
@@ -336,7 +372,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			<section class="panel">
 				<form class="panel-toolbar" method="get">
 					<input class="search" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Search by name or username..." aria-label="Search users">
-					<button class="button light" type="submit">SEARCH</button>
+					<button class="button" type="submit">SEARCH</button>
 				</form>
 				<div class="table-wrap">
 					<table>
@@ -364,11 +400,17 @@ document.addEventListener('DOMContentLoaded', function () {
 								<td><span class="badge <?= strtolower($user["status"]) === "active" ? "active" : "inactive" ?>"><?= htmlspecialchars($user["status"]) ?></span></td>
 								<td>
 									<div class="actions">
-										<a class="icon-button" href="users.php?edit=<?= (int) $user["id"] ?>" title="Edit user">✎ Edit</a>
+										<a class="btn-action edit" href="users.php?edit=<?= (int) $user["id"] ?>" title="Edit User">
+											<i class="fas fa-pen"></i>
+											<span>Edit</span>
+										</a>
 										<form class="delete-form" method="post" onsubmit="return confirm('Delete this user?');">
 											<input type="hidden" name="action" value="delete_user">
 											<input type="hidden" name="user_id" value="<?= (int) $user["id"] ?>">
-											<button class="icon-button delete" type="submit" title="Delete user">⌫ Delete</button>
+											<button class="btn-action delete" type="submit" title="Delete User">
+												<i class="fas fa-trash-alt"></i>
+												<span>Delete</span>
+											</button>
 										</form>
 									</div>
 								</td>

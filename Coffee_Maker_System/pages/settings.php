@@ -86,12 +86,15 @@ if ($logged_username) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Settings | Coffee Maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #f7f7f7; color: #2b1610; font-family: Arial, Helvetica, sans-serif; }
+body { background: #f7f7f7; color: #2b1610; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; }
 .app-shell { min-height: 100vh; display: flex; }
-.sidebar { width: 245px; min-height: 100vh; padding: 30px 18px 20px; background: #2B1610; color: #fff; position: fixed; left: 0; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: space-between; }
+.sidebar { width: 245px; min-height: 100vh; padding: 30px 18px 20px; background: #2B1610; color: #fff; position: fixed; left: 0; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: space-between; font-family: Arial, Helvetica, sans-serif; }
 .brand { padding: 0 16px 35px; font-size: 20px; font-weight: 700; letter-spacing: 1px; }
 .nav { display: flex; flex-direction: column; gap: 8px; }
 .nav-item { padding: 14px 16px; color: #aeb3bd; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 600; letter-spacing: .5px; transition: .2s; }
@@ -124,9 +127,9 @@ body { background: #f7f7f7; color: #2b1610; font-family: Arial, Helvetica, sans-
 
 .settings { border: 0; background: transparent; color: #fff; font-size: 18px; text-decoration: none; cursor: pointer; display: flex; align-items: center; }
 
-.content { margin-left: 245px; width: calc(100% - 245px); padding: 34px 38px 60px; }
-.settings-header { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 25px; }
-h1 { font-size: 25px; } .intro { margin-top: 6px; color: #8f8986; font-size: 12px; }
+.content { margin-left: 245px; width: calc(100% - 245px); padding: 35px 40px 60px; }
+.settings-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 30px; }
+.settings-header h1 { font-size: 28px; font-weight: 700; color: #20242b; }
 .header-actions { display: flex; gap: 8px; } .button { border: 1px solid #cdbbb3; border-radius: 6px; padding: 10px 15px; background: #fff; color: #70483a; font-size: 10px; cursor: pointer; text-decoration: none; } .button.primary { border-color: #70402e; background: #70402e; color: #fff; font-weight: 700; }
 .tabs { display: flex; gap: 20px; border-bottom: 1px solid #e4dcd8; margin-bottom: 25px; } .tab { padding: 0 0 12px; color: #766e6a; font-size: 10px; font-weight: 700; text-decoration: none; } .tab.active { color: #4d3026; border-bottom: 2px solid #70402e; }
 .panel-grid { display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 20px; align-items: start; } .panel { padding: 20px; border: 1px solid #eee5e1; border-radius: 8px; background: #fff; } .panel + .panel { margin-top: 18px; } .panel h2 { font-size: 15px; font-weight: 700; } .panel-description { margin-top: 5px; color: #8f8986; font-size: 10px; }
@@ -198,7 +201,7 @@ h1 { font-size: 25px; } .intro { margin-top: 6px; color: #8f8986; font-size: 12p
 </aside>
 
 <section class="content">
-<header class="settings-header"><div><h1>Settings</h1><p class="intro">Manage your store details, receipt preferences, and payment methods.</p></div><div class="header-actions"><a class="button" href="settings.php?tab=<?= htmlspecialchars($active_tab) ?>">Cancel</a><button class="button primary" form="settings-form" type="submit">Save Changes</button></div></header>
+<header class="settings-header"><div><h1>Settings</h1></div><div class="header-actions"><a class="button" href="settings.php?tab=<?= htmlspecialchars($active_tab) ?>">Cancel</a><button class="button primary" form="settings-form" type="submit">Save Changes</button></div></header>
 <nav class="tabs"><a class="tab <?= $active_tab === "store" ? "active" : "" ?>" href="settings.php?tab=store">Store Info</a><a class="tab <?= $active_tab === "receipts" ? "active" : "" ?>" href="settings.php?tab=receipts">Receipts</a><a class="tab <?= $active_tab === "payments" ? "active" : "" ?>" href="settings.php?tab=payments">Payments</a></nav>
 <?php if ($message !== ""): ?><div class="notice"><?= htmlspecialchars($message) ?></div><?php endif; ?>
 <form id="settings-form" method="post">

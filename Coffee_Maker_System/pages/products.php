@@ -301,20 +301,21 @@ $form_addons = $edit_product ? decode_addons($edit_product["addons"] ?? "") : []
 		body { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: #f7f7f7; color: #000000; }
 		.app-shell { min-height: 100vh; display: flex; }
 		
-		/* Sidebar & Popover Styles (Matched to POS) */
-		.sidebar { width: 245px; min-height: 100vh; background: #2b1610; color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 30px 18px 20px; position: fixed; inset: 0 auto 0 0; font-family: Arial, Helvetica, sans-serif; }
-		.brand { font-size: 20px; font-weight: 700; letter-spacing: 1px; padding: 0 16px 35px; }
+		/* Sidebar Styles matched exactly to Orders screen */
+		.sidebar { width: 245px; min-height: 100vh; padding: 30px 18px 20px; background: #2B1610; color: #fff; position: fixed; left: 0; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: space-between; font-family: Arial, Helvetica, sans-serif; }
+		.brand { padding: 0 16px 35px; font-size: 20px; font-weight: 700; letter-spacing: 1px; }
 		.nav { display: flex; flex-direction: column; gap: 8px; }
-		.nav-item { color: #aeb3bd; text-decoration: none; padding: 14px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; letter-spacing: .5px; transition: .2s; }
-		.nav-item:hover, .nav-item.active { background: #74473b; color: #fff; font-weight: 700; }
+		.nav-item { padding: 14px 16px; color: #aeb3bd; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 600; letter-spacing: .5px; transition: .2s; }
+		.nav-item:hover, .nav-item.active { background: #74473b; color: #fff; }
 		.sidebar-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #492c25; padding: 18px 10px 0; }
 
+		/* Profile & Popover Styles */
 		.user-wrapper { position: relative; flex: 1; }
-		.user { display: flex; align-items: center; gap: 10px; color: #dfe2e8; font-size: 12px; font-weight: 700; cursor: pointer; padding: 6px 8px; border-radius: 6px; transition: background 0.2s; user-select: none; }
+		.user { display: flex; align-items: center; gap: 10px; color: #dfe2e8; font-size: 12px; font-weight: 600; cursor: pointer; padding: 6px 8px; border-radius: 6px; transition: background 0.2s; user-select: none; }
 		.user:hover { background: #3c2018; }
 		.avatar { width: 34px; height: 34px; border-radius: 50%; background: #60463e; display: grid; place-items: center; font-size: 14px; color: #fff; flex-shrink: 0; }
 		.user-details-text { display: flex; flex-direction: column; line-height: 1.25; }
-		.user-name { color: #fff; font-size: 13px; font-weight: 700; }
+		.user-name { color: #fff; font-size: 13px; font-weight: 600; }
 		.user-role { color: #aeb3bd; font-size: 10px; }
 		.toggle-icon { margin-left: auto; font-size: 10px; color: #aeb3bd; transition: transform 0.2s; }
 		.user.active .toggle-icon { transform: rotate(180deg); }
@@ -332,12 +333,12 @@ $form_addons = $edit_product ? decode_addons($edit_product["addons"] ?? "") : []
 		.popover-logout { display: flex; align-items: center; gap: 8px; color: #e74c3c; text-decoration: none; font-size: 12px; font-weight: 600; padding: 6px 8px; border-radius: 5px; transition: background 0.15s; }
 		.popover-logout:hover { background: #fdf2f2; }
 
-		.settings { border: 0; background: transparent; color: #fff; font-size: 16px; cursor: pointer; text-decoration: none; display: flex; align-items: center; }
+		.settings { border: 0; background: transparent; color: #fff; font-size: 18px; cursor: pointer; text-decoration: none; display: flex; align-items: center; }
 
-		/* Content Area Styles Matched to POS */
-		.content { margin-left: 245px; width: calc(100% - 245px); padding: 42px 35px; color: #000000; }
-		.topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 23px; }
-		h1 { font-size: 26px; margin-bottom: 6px; color: #000000; font-weight: 700; } 
+		/* Content Area Styles */
+		.content { width: calc(100% - 245px); margin-left: 245px; padding: 35px 40px; color: #000000; }
+		.topbar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 30px; }
+		.topbar h1 { font-size: 28px; margin-bottom: 6px; }
 		.subtitle { color: #000000; font-size: 13px; }
 
 		.add-button, .save-button { border: 1px solid #241f1d; border-radius: 7px; background: #241f1d; color: #ffffff; padding: 10px 16px; font-size: 11px; font-family: inherit; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; }
@@ -363,10 +364,41 @@ $form_addons = $edit_product ? decode_addons($edit_product["addons"] ?? "") : []
 		.category-name { color: #000000; font-weight: 700; } 
 		.category-status { display: inline-block; padding: 4px 8px; border-radius: 4px; background: #e2f2e5; color: #28763b; font-size: 9px; font-weight: 700; }
 
-		.category-actions { display: flex; gap: 8px; } 
-		.category-actions a { width: 28px; height: 28px; display: grid; place-items: center; border: 1px solid #ded5d1; border-radius: 5px; color: #000000; text-decoration: none; font-size: 12px; transition: background .15s; } 
-		.category-actions a:hover { background: #f7f7f7; }
-		.category-actions a.delete { color: #a34a3f; }
+		/* AESTHETIC ACTION BUTTONS */
+		.category-actions, .card-actions { display: flex; align-items: center; gap: 8px; }
+		.btn-action {
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+			padding: 6px 12px;
+			border-radius: 6px;
+			font-size: 11px;
+			font-weight: 600;
+			text-decoration: none;
+			border: none;
+			cursor: pointer;
+			transition: all 0.2s ease;
+		}
+		.btn-action.edit {
+			background-color: #f2ece9;
+			color: #54392f;
+		}
+		.btn-action.edit:hover {
+			background-color: #54392f;
+			color: #ffffff;
+			transform: translateY(-1px);
+			box-shadow: 0 2px 6px rgba(84, 57, 47, 0.15);
+		}
+		.btn-action.delete {
+			background-color: #fdf2f2;
+			color: #a34a3f;
+		}
+		.btn-action.delete:hover {
+			background-color: #a34a3f;
+			color: #ffffff;
+			transform: translateY(-1px);
+			box-shadow: 0 2px 6px rgba(163, 74, 63, 0.15);
+		}
 
 		.category-edit-page { background: #fff; border: 1px solid #ededed; border-radius: 8px; padding: 24px; color: #000000; } 
 		.category-edit-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; } 
@@ -392,7 +424,7 @@ $form_addons = $edit_product ? decode_addons($edit_product["addons"] ?? "") : []
 
 		.management-grid { display: grid; grid-template-columns: 1fr; gap: 25px; align-items: start; }
 		.panel { background: #fff; border: 1px solid #ededed; border-radius: 8px; padding: 22px; color: #000000; }
-		.panel h2 { font-size: 16px; margin-bottom: 18px; color: #000000; font-weight: 700; }
+		.panel h2 { font-size: 17px; margin-bottom: 18px; font-weight: 700; }
 
 		.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 18px; }
 		.product-card { border: 1px solid #ededed; background: #fff; border-radius: 7px; overflow: hidden; transition: transform .15s, box-shadow .15s; display: flex; flex-direction: column; justify-content: space-between; }
@@ -411,9 +443,7 @@ $form_addons = $edit_product ? decode_addons($edit_product["addons"] ?? "") : []
 		.category-label { color: #000000; font-size: 10px; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; } 
 		.price { color: #000000; font-size: 13px; font-weight: 700; }
 
-		.card-actions { display: flex; gap: 6px; margin-top: 10px; } 
-		.icon-button, .delete-button { width: 28px; height: 26px; border: 1px solid #ded5d1; border-radius: 5px; color: #000000; background: #fff; font-size: 12px; font-family: inherit; cursor: pointer; text-decoration: none; display: grid; place-items: center; } 
-		.delete-button { color: #a34a3f; }
+		.card-actions { margin-top: 10px; } 
 
 		label { display: block; color: #000000; font-size: 10px; font-weight: 700; margin: 15px 0 7px; text-transform: uppercase; letter-spacing: 0.5px; } 
 		input, textarea, select { width: 100%; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px; font-family: inherit; font-size: 12px; outline: none; color: #000000; background: #fff; } 
@@ -444,8 +474,17 @@ $form_addons = $edit_product ? decode_addons($edit_product["addons"] ?? "") : []
 		.edit-modal { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 22px; background: rgba(32, 22, 19, .68); } 
 		.edit-modal .panel { width: min(100%, 460px); max-height: calc(100vh - 44px); overflow-y: auto; border-radius: 10px; box-shadow: 0 18px 45px rgba(0,0,0,.25); }
 
-		@media (max-width: 850px) { .sidebar { width: 190px; } .content { margin-left: 190px; width: calc(100% - 190px); padding: 25px; } .management-grid { grid-template-columns: 1fr; } }
-		@media (max-width: 600px) { .app-shell { display: block; } .sidebar { position: relative; width: 100%; min-height: auto; padding: 20px; } .brand { padding-bottom: 20px; } .nav { flex-direction: row; flex-wrap: wrap; } .nav-item { padding: 10px; } .sidebar-footer { margin-top: 22px; } .content { margin-left: 0; width: 100%; padding: 22px 16px; } .topbar { align-items: flex-start; flex-direction: column; gap: 14px; } .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } }
+		@media (max-width: 700px) { 
+			.sidebar { position: relative; width: 100%; min-height: auto; padding: 22px 0; } 
+			.app-shell { display: block; } 
+			.brand { padding-bottom: 20px; } 
+			.nav { display: flex; flex-wrap: wrap; } 
+			.nav-item { padding: 10px 14px; } 
+			.sidebar-footer { margin-top: 18px; } 
+			.content { width: 100%; margin-left: 0; padding: 30px 16px; } 
+			.topbar { align-items: start; flex-direction: column; gap: 5px; } 
+			.product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } 
+		}
 	</style>
 	<link rel="stylesheet" href="../assets/sidebar.css">
 </head>
@@ -455,11 +494,15 @@ $form_addons = $edit_product ? decode_addons($edit_product["addons"] ?? "") : []
 		<div>
 			<div class="brand">COFFEE MAKER</div>
 			<nav class="nav">
-				<a class="nav-item" href="dashboard.php">DASHBOARD</a>
+				<?php if ($user_role !== "cashier"): ?>
+					<a class="nav-item" href="dashboard.php">DASHBOARD</a>
+				<?php endif; ?>
 				<a class="nav-item" href="pos.php">POS</a>
 				<a class="nav-item" href="orders.php">ORDERS</a>
-				<a class="nav-item active" href="products.php">PRODUCTS</a>
-				<a class="nav-item" href="users.php">USERS</a>
+				<?php if ($user_role !== "cashier"): ?>
+					<a class="nav-item active" href="products.php">PRODUCTS</a>
+					<a class="nav-item" href="users.php">USERS</a>
+				<?php endif; ?>
 			</nav>
 		</div>
 
@@ -575,7 +618,7 @@ $form_addons = $edit_product ? decode_addons($edit_product["addons"] ?? "") : []
 				</section>
 			<?php else: ?>
 				<section>
-					<h2 style="font-size: 16px; margin: 0 0 18px; font-weight: 700;">Categories</h2>
+					<h2 style="font-size: 17px; margin: 0 0 18px; font-weight: 700;">Categories</h2>
 					<div class="category-table-wrap">
 						<table class="category-table">
 							<thead>
@@ -598,8 +641,14 @@ $form_addons = $edit_product ? decode_addons($edit_product["addons"] ?? "") : []
 										<td><span class="category-status">Active</span></td>
 										<td>
 											<div class="category-actions">
-												<a href="products.php?tab=categories&amp;edit_category=<?= (int) $category["id"] ?>" aria-label="Edit <?= htmlspecialchars($category["name"]) ?>">✎</a>
-												<a class="delete" href="products.php?tab=categories&amp;delete_category=<?= (int) $category["id"] ?>" aria-label="Delete <?= htmlspecialchars($category["name"]) ?>">▮</a>
+												<a class="btn-action edit" href="products.php?tab=categories&amp;edit_category=<?= (int) $category["id"] ?>" title="Edit Category">
+													<i class="fas fa-pen"></i>
+													<span>Edit</span>
+												</a>
+												<a class="btn-action delete" href="products.php?tab=categories&amp;delete_category=<?= (int) $category["id"] ?>" title="Delete Category">
+													<i class="fas fa-trash-alt"></i>
+													<span>Delete</span>
+												</a>
 											</div>
 										</td>
 									</tr>
@@ -628,7 +677,7 @@ $form_addons = $edit_product ? decode_addons($edit_product["addons"] ?? "") : []
 							<form method="post">
 								<input type="hidden" name="action" value="delete_category">
 								<input type="hidden" name="category_id" value="<?= (int) $delete_category["id"] ?>">
-								<button type="submit">&#128465; Delete</button>
+								<button type="submit"><i class="fas fa-trash-alt"></i> Delete</button>
 							</form>
 						</div>
 					</section>
@@ -664,11 +713,17 @@ $form_addons = $edit_product ? decode_addons($edit_product["addons"] ?? "") : []
 									<div>
 										<div class="price">₱<?= number_format((float) $product["price"], 2) ?></div>
 										<div class="card-actions">
-											<a class="icon-button" href="products.php?edit=<?= (int) $product["id"] ?>#product-form" aria-label="Edit <?= htmlspecialchars($product["product_name"]) ?>" title="Edit product">✎</a>
-											<form method="post" onsubmit="return confirm('Remove this product from the menu?');">
+											<a class="btn-action edit" href="products.php?edit=<?= (int) $product["id"] ?>#product-form" title="Edit product">
+												<i class="fas fa-pen"></i>
+												<span>Edit</span>
+											</a>
+											<form method="post" onsubmit="return confirm('Remove this product from the menu?');" style="display: inline;">
 												<input type="hidden" name="action" value="delete">
 												<input type="hidden" name="product_id" value="<?= (int) $product["id"] ?>">
-												<button class="delete-button" type="submit" aria-label="Delete <?= htmlspecialchars($product["product_name"]) ?>" title="Delete product">⌫</button>
+												<button class="btn-action delete" type="submit" title="Delete product">
+													<i class="fas fa-trash-alt"></i>
+													<span>Delete</span>
+												</button>
 											</form>
 										</div>
 									</div>

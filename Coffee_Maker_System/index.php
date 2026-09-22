@@ -1,7 +1,5 @@
 <?php
-
 session_start();
-
 ?>
 
 <!DOCTYPE html>
@@ -12,13 +10,20 @@ session_start();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coffee Maker - Login</title>
 
-    <style>
+    <!-- POS Font Import (Plus Jakarta Sans) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         body {
@@ -47,33 +52,35 @@ session_start();
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
         .logo {
             width: 120px;
             height: auto;
-            margin-bottom: 38px;
+            margin-bottom: 28px;
         }
 
         .coffee-title {
-            font-size: 44px;
-            font-weight: 400;
-            color: #222;
-            letter-spacing: -1px;
+            font-size: 32px;
+            font-weight: 700;
+            color: #2B1610;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         .title-line {
             width: 40px;
-            height: 5px;
-            background: #000;
-            border-radius: 5px;
-            margin-top: 25px;
+            height: 4px;
+            background: #2B1610;
+            border-radius: 4px;
+            margin-top: 20px;
         }
 
         /* RIGHT SIDE */
         .right-section {
             width: 61.5%;
-            background: #916f65;
+            background: #2B1610;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -82,23 +89,25 @@ session_start();
         /* LOGIN CARD */
         .login-card {
             width: 385px;
-            height: 368px;
-            background: white;
-            border-radius: 8px;
-            padding: 54px 28px;
+            height: auto;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 38px 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
         }
 
         .input-group {
-            margin-bottom: 17px;
+            margin-bottom: 18px;
         }
 
         label {
             display: block;
-            font-size: 8px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            color: #333;
-            margin-bottom: 7px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: #20242b;
+            margin-bottom: 8px;
+            text-transform: uppercase;
         }
 
         .input-box {
@@ -108,36 +117,44 @@ session_start();
         .input-box input {
             width: 100%;
             height: 44px;
-            border: 1px solid #bdbdbd;
+            border: 1px solid #dcd6d3;
             border-radius: 7px;
-            padding: 0 35px;
-            font-size: 12px;
+            padding: 0 14px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #20242b;
             outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .input-box input.has-eye {
+            padding-right: 38px;
         }
 
         .input-box input:focus {
-            border-color: #777;
+            border-color: #74473b;
         }
 
         .input-box input::placeholder {
-            color: #aaa;
+            color: #8f95a0;
+            font-weight: 400;
         }
 
-        .icon {
-            position: absolute;
-            left: 10px;
-            top: 13px;
-            font-size: 13px;
-            color: #888;
-        }
-
+        /* EYE ICON STYLING */
         .eye {
             position: absolute;
-            right: 10px;
-            top: 13px;
-            font-size: 13px;
-            color: #999;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            color: #74473b;
             cursor: pointer;
+            user-select: none;
+            transition: color 0.2s ease;
+        }
+
+        .eye:hover {
+            color: #2B1610;
         }
 
         /* LOGIN BUTTON */
@@ -146,23 +163,24 @@ session_start();
             height: 46px;
             margin-top: 10px;
             border: none;
-            border-radius: 6px;
-            background: #000;
-            color: white;
-            font-size: 11px;
-            font-weight: bold;
-            letter-spacing: 1px;
+            border-radius: 7px;
+            background: #2B1610;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
             cursor: pointer;
+            transition: background 0.2s ease;
         }
 
         .login-button:hover {
-            background: #333;
+            background: #74473b;
         }
 
         .arrow {
-            font-size: 17px;
+            font-size: 15px;
             vertical-align: middle;
-            margin-left: 3px;
+            margin-left: 4px;
         }
 
         /* Bottom line */
@@ -170,49 +188,49 @@ session_start();
             width: 100%;
             height: 1px;
             background: #eeeeee;
-            margin-top: 20px;
+            margin: 20px 0;
         }
 
         .self-order-button {
             width: 100%;
-            height: 38px;
-            margin-top: 14px;
-            border: 1px solid #e5e5e5;
-            border-radius: 6px;
-            background: #fff;
-            color: #443630;
-            font-size: 10px;
+            height: 42px;
+            border: 1px solid #dcd6d3;
+            border-radius: 7px;
+            background: #ffffff;
+            color: #2B1610;
+            font-size: 12px;
+            font-weight: 600;
             cursor: pointer;
+            transition: background 0.2s ease, border-color 0.2s ease;
         }
 
         .self-order-button:hover {
             background: #f7f2ef;
-            border-color: #cbbab2;
+            border-color: #74473b;
         }
 
         /* Error Message */
         .error-message {
-            color: #b00020;
-            font-size: 10px;
-            margin-bottom: 12px;
+            color: #d32f2f;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 16px;
             text-align: center;
         }
 
         /* RESPONSIVE */
         @media (max-width: 900px) {
-
             .login-container {
                 width: 100%;
                 height: min(600px, calc(100% - 32px));
             }
 
             .coffee-title {
-                font-size: 30px;
+                font-size: 26px;
             }
         }
 
         @media (max-width: 600px) {
-
             body {
                 height: auto;
                 min-height: 100vh;
@@ -223,6 +241,7 @@ session_start();
                 width: 90%;
                 height: auto;
                 flex-direction: column;
+                margin: 20px 0;
             }
 
             .left-section,
@@ -231,29 +250,26 @@ session_start();
             }
 
             .left-section {
-                height: 300px;
+                height: 250px;
             }
 
             .right-section {
-                height: 350px;
+                padding: 30px 20px;
+            }
+
+            .login-card {
+                width: 100%;
             }
         }
-
     </style>
-
 </head>
 
 <body>
 
     <div class="login-container">
 
-        <!-- =========================
-             LEFT SECTION
-        ========================== -->
-
+        <!-- LEFT SECTION -->
         <div class="left-section">
-
-            <!-- Your Coffee Maker Logo -->
             <img 
                 src="assets/images/logo.png"
                 alt="Coffee Maker Logo"
@@ -265,17 +281,11 @@ session_start();
             </h1>
 
             <div class="title-line"></div>
-
         </div>
 
-
-        <!-- =========================
-             RIGHT SECTION
-        ========================== -->
-
+        <!-- RIGHT SECTION -->
         <div class="right-section">
 
-            <!-- LOGIN FORM -->
             <form 
                 class="login-card"
                 action="login_process.php"
@@ -283,102 +293,57 @@ session_start();
             >
 
                 <?php
-
-                // Display error if login_process.php sends one
                 if (isset($_GET["error"])) {
-
                     echo '<div class="error-message">
                             Invalid Employee ID or Password.
                           </div>';
-
                 }
-
                 ?>
 
-
-                <!-- =========================
-                     USERNAME / EMPLOYEE ID
-                ========================== -->
-
+                <!-- USERNAME / EMPLOYEE ID -->
                 <div class="input-group">
-
-                    <label>
-                        USERNAME / EMPLOYEE ID
-                    </label>
-
+                    <label for="username">USERNAME</label>
                     <div class="input-box">
-
-                        <span class="icon">
-                            ♙
-                        </span>
-
                         <input
                             type="text"
+                            id="username"
                             name="username"
-                            placeholder="Enter ID"
+                            placeholder="Enter Username"
                             autocomplete="username"
                             required
                         >
-
                     </div>
-
                 </div>
 
-
-                <!-- =========================
-                     PASSWORD
-                ========================== -->
-
+                <!-- PASSWORD -->
                 <div class="input-group">
-
-                    <label>
-                        PASSWORD
-                    </label>
-
+                    <label for="password">PASSWORD</label>
                     <div class="input-box">
-
-                        <span class="icon">
-                            🔒
-                        </span>
-
                         <input
                             type="password"
                             name="password"
                             id="password"
-                            placeholder="••••••••"
+                            class="has-eye"
+                            placeholder="Enter Password"
                             autocomplete="current-password"
                             required
                         >
-
-                        <span
-                            class="eye"
+                        <i
+                            class="fas fa-eye eye"
+                            id="toggleIcon"
                             onclick="togglePassword()"
-                        >
-                            ◉
-                        </span>
-
+                        ></i>
                     </div>
-
                 </div>
 
-
-                <!-- =========================
-                     LOGIN BUTTON
-                ========================== -->
-
+                <!-- LOGIN BUTTON -->
                 <button
                     type="submit"
                     class="login-button"
                 >
-
                     LOGIN
-
-                    <span class="arrow">
-                        →
-                    </span>
-
+                    <span class="arrow">→</span>
                 </button>
-
 
                 <div class="bottom-line"></div>
 
@@ -387,7 +352,7 @@ session_start();
                     class="self-order-button"
                     onclick="window.location.href='pages/self_order.php'"
                 >
-                    ♜ &nbsp; Self-Ordering
+                    Self-Ordering
                 </button>
 
             </form>
@@ -396,30 +361,22 @@ session_start();
 
     </div>
 
-
-    <!-- =========================
-         JAVASCRIPT
-    ========================== -->
-
+    <!-- JAVASCRIPT -->
     <script>
-
         function togglePassword() {
-
-            const password =
-                document.getElementById("password");
+            const password = document.getElementById("password");
+            const toggleIcon = document.getElementById("toggleIcon");
 
             if (password.type === "password") {
-
                 password.type = "text";
-
+                toggleIcon.classList.remove("fa-eye");
+                toggleIcon.classList.add("fa-eye-slash");
             } else {
-
                 password.type = "password";
-
+                toggleIcon.classList.remove("fa-eye-slash");
+                toggleIcon.classList.add("fa-eye");
             }
-
         }
-
     </script>
 
 </body>
